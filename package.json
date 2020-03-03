@@ -1,20 +1,14 @@
 {
-  "name": "react-native-events-calendar",
+  "name": "@agendapro/react-native-events-calendar",
   "version": "0.0.1",
   "description": "show calendar events by date",
   "main": "./src/EventCalendar.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-  },
-  "lint-staged": {
-    "*.js": [
-      "yarn prettier",
-      "git add"
-    ]
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/joshyhargreaves/react-native-event-calendar.git"
+    "url": "git+https://github.com/agendapro/react-native-event-calendar.git"
   },
   "keywords": [
     "react-native",
@@ -29,15 +23,13 @@
   },
   "devDependencies": {
     "husky": "^0.14.3",
-    "lint-staged": "^7.2.0",
-    "prettier": "^1.13.7",
-    "react": "16.0.0-alpha.6",
-    "react-native": "^0.44.0"
+    "react": "16.9.0",
+    "react-native": "0.61.5"
   },
-  "author": "Duy Luong & Josh Hargreaves",
+  "author": "Rodrigo Monsalve & Nayhib Padron",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/joshyhargreaves/react-native-event-calendar/issues"
+    "url": "https://github.com/agendapro/react-native-event-calendar/issues"
   },
-  "homepage": "https://github.com/joshyhargreaves/react-native-event-calendar#readme"
+  "homepage": "https://github.com/agendapro/react-native-event-calendar#readme"
 }
