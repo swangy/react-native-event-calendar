@@ -62,16 +62,6 @@ function populateEvents(events, screenWidth, dayStart) {
   let self = this;
   let calculatedEvents = [];
 
-  events = events
-    .map((ev, index) => ({ ...ev, index: index }))
-    .sort(function(a, b) {
-      if (a.start < b.start) return -1;
-      if (a.start > b.start) return 1;
-      if (a.end < b.end) return -1;
-      if (a.end > b.end) return 1;
-      return 0;
-    });
-
   columns = [];
   lastEnd = null;
 

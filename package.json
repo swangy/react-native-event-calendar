@@ -1,13 +1,10 @@
 {
   "name": "react-native-events-calendar",
-  "version": "1.0.8",
+  "version": "0.0.1",
   "description": "show calendar events by date",
   "main": "./src/EventCalendar.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "precommit": "lint-staged",
-    "prettier": "prettier --single-quote --trailing-comma es5 --write",
-    "prettier-all": "prettier --single-quote --trailing-comma es5 --write \"**/*.js\""
   },
   "lint-staged": {
     "*.js": [
