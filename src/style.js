@@ -5,9 +5,7 @@ import { Platform, StyleSheet } from 'react-native';
 const leftMargin = 50 - 1;
 
 export default function styleConstructor(theme = {}, calendarHeight) {
-  console.log(theme);
-  console.log(theme.event);
-  let style = {
+  const style = {
     container: {
       flex: 1,
       backgroundColor: '#ffff',
@@ -15,7 +13,8 @@ export default function styleConstructor(theme = {}, calendarHeight) {
     },
     contentStyle: {
       backgroundColor: '#ffff',
-      height: calendarHeight + 10,
+      height: calendarHeight + 24,
+      marginTop: 16,
       ...theme.contentStyle,
     },
     header: {
@@ -99,6 +98,15 @@ export default function styleConstructor(theme = {}, calendarHeight) {
       backgroundColor: 'red',
       ...theme.lineNow,
     },
+    circleNow: {
+      height: 7,
+      width: 7,
+      borderRadius: 7,
+      position: 'absolute',
+      left: leftMargin,
+      backgroundColor: 'red',
+      ...theme.circleNow,
+    },
     timeLabel: {
       position: 'absolute',
       left: 15,
@@ -107,6 +115,21 @@ export default function styleConstructor(theme = {}, calendarHeight) {
       fontFamily: Platform.OS === 'ios' ? 'Helvetica Neue' : 'Roboto',
       fontWeight: '500',
       ...theme.timeLabel,
+    },
+    blockedLine: {
+      transform: [{
+        rotate: '45deg',
+      }],
+      backgroundColor: '#F6F6F6',
+      ...theme.blockedLine,
+    },
+    blockedContainer: {
+      position: 'absolute',
+      width: '100%',
+      overflow: 'hidden',
+      flexDirection: 'row',
+      alignItems: 'center',
+      ...theme.blockedContainer,
     },
   };
   return StyleSheet.create(style);

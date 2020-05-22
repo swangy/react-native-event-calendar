@@ -1,8 +1,13 @@
 // @flow
 import moment from 'moment';
-const offset = 100;
 
-function buildEvent(column, left, width, dayStart) {
+const offset = 100;
+const blockHeight = 100;
+const minutesPerBlock = 30;
+
+const heightPerMinute = blockHeight / minutesPerBlock;
+
+function buildEvent(column, left, width, dayStart, ) {
   const startTime = moment(column.start);
   const endTime = column.end
     ? moment(column.end)
@@ -11,17 +16,17 @@ function buildEvent(column, left, width, dayStart) {
     .clone()
     .hour(dayStart)
     .minute(0);
-  const diffHours = startTime.diff(dayStartTime, 'hours', true);
+  const diffMinutes = startTime.diff(dayStartTime, 'minutes', true);
 
-  column.top = diffHours * offset;
-  column.height = endTime.diff(startTime, 'hours', true) * offset;
+  column.top = diffMinutes * ( blockHeight / minutesPerBlock );
+  column.height = endTime.diff(startTime, 'minutes', true) * heightPerMinute;
   column.width = width;
   column.left = left;
   return column;
 }
 
 function collision(a, b) {
-  return a.end > b.start && a.start < b.end;
+  return moment(a.end).isAfter(b.start) && moment(a.start).isBefore(b.end);
 }
 
 function expand(ev, column, columns) {
