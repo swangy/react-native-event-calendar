@@ -1,6 +1,6 @@
 // @flow
-import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
-import React, { useEffect } from 'react';
+import { View, Text, ScrollView, TouchableOpacity, RefreshControl } from 'react-native';
+import React, { useEffect, useState } from 'react';
 import moment from 'moment';
 import _ from 'lodash';
 import populateEvents from './Packer';
@@ -33,6 +33,14 @@ const DayView = ({
   const calendarHeight = (end - start) * 100;
   const containerWidth = width - LEFT_MARGIN;
   const packedEvents = populateEvents(events, width, start);
+
+  const [refreshing, setRefreshing] = React.useState(false);
+
+  const onRefresh = React.useCallback(() => {
+    setRefreshing(true);
+
+    wait(2000).then(() => setRefreshing(false));
+  }, [refreshing]);
 
   const renderRedLine = () => {
     const now = moment();
@@ -135,7 +143,10 @@ const DayView = ({
   };
 
   return (
-    <ScrollView contentContainerStyle={[styles.contentStyle, { width }]}>
+    <ScrollView
+      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+      contentContainerStyle={[styles.contentStyle, { width }]}
+    >
       {renderLines()}
       {renderEvents()}
       {renderRedLine()}
