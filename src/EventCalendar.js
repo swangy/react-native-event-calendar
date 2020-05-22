@@ -13,6 +13,7 @@ import React from 'react';
 import styleConstructor from './style';
 
 import DayView from './DayView';
+import {HEIGHT_PER_MINUTE} from './constants';
 
 export default class EventCalendar extends React.Component {
   static dateByIndex(index, initDate, size) {
@@ -23,17 +24,7 @@ export default class EventCalendar extends React.Component {
     super(props);
     const start = props.start || 0;
     const end = props.end || 24;
-    this.calendarStyle = styleConstructor(props.styles, (end - start) * 100);
-
-    this.groupedEvents = {};
-    props.events.forEach((event) => {
-      const groupKey = moment(event.start).format('YYYY-MM-DD');
-      if ( groupKey in this.groupedEvents ) {
-        this.groupedEvents[groupKey].push(event);
-      } else {
-        this.groupedEvents[groupKey] = [event];
-      }
-    });
+    this.calendarStyle = styleConstructor(props.styles, (end - start) * 60 * HEIGHT_PER_MINUTE);
 
     this.calendarRef = React.createRef();
     this.getItem = this.getItem.bind(this);
@@ -74,7 +65,7 @@ export default class EventCalendar extends React.Component {
     const {
       width, initDate, size, onDateChange,
     } = this.props;
-    const index = parseInt(event.nativeEvent.contentOffset.x / width, 10);
+    const index = Math.round(event.nativeEvent.contentOffset.x / width);
     const date = EventCalendar.dateByIndex(index, initDate, size).format('YYYY-MM-DD');
     if (onDateChange) onDateChange(date);
   }
@@ -108,15 +99,15 @@ export default class EventCalendar extends React.Component {
   }
 
   render() {
-    const { width, size } = this.props;
+    const { width, size, events } = this.props;
     return (
       <View style={[this.calendarStyle.container, { width }]}>
         <VirtualizedList
           ref={this.calendarRef}
-          windowSize={2}
+          windowSize={3}
           initialNumToRender={3}
           initialScrollIndex={size}
-          data={this.groupedEvents}
+          data={events}
           getItemCount={() => size * 2}
           getItem={this.getItem}
           keyExtractor={(item, index) => index.toString()}
@@ -125,8 +116,8 @@ export default class EventCalendar extends React.Component {
           pagingEnabled
           renderItem={this.renderItem}
           style={{ width }}
-          onMomentumScrollEnd={this.scrollEndHandler}
-          // {...virtualizedListProps}
+          onScroll={this.scrollEndHandler}
+          showsHorizontalScrollIndicator={false}
         />
       </View>
     );
