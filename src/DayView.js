@@ -30,6 +30,7 @@ const DayView = ({
   start,
   styles,
   width,
+  refreshControl
 }) => {
   const containerWidth = width - LEFT_MARGIN;
   const blockedEvents = events.filter((e) => e.booking_type === 'blocked');
@@ -210,6 +211,7 @@ const DayView = ({
       showsVerticalScrollIndicator={false}
       contentOffset={{ y: contentOffset() }}
       ref={scrollViewRef}
+      refreshControl={refreshControl}
     >
       {renderBlocks()}
       {renderLines()}

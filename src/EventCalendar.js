@@ -74,6 +74,7 @@ export default class EventCalendar extends React.Component {
     const {
       initDate, size, formatHeader, width,
       format24h, headerStyle, renderEvent, onEventTapped, scrollToFirst, start, end,
+      refreshControl,
     } = this.props;
     const date = EventCalendar.dateByIndex(index, initDate, size);
 
@@ -93,6 +94,7 @@ export default class EventCalendar extends React.Component {
           scrollToFirst={scrollToFirst}
           start={start}
           end={end}
+          refreshControl={refreshControl}
         />
       </View>
     );
