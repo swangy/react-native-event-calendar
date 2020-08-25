@@ -209,7 +209,6 @@ const DayView = ({
 
   return (
     <ScrollView
-      bounces={false}
       contentContainerStyle={[styles.contentStyle, { width }]}
       showsVerticalScrollIndicator={false}
       contentOffset={{ y: contentOffset() }}
