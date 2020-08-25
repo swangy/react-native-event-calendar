@@ -156,7 +156,9 @@ const DayView = ({
   const renderBlocks = () => {
     const lineWidth = 4;
     const lineMargin = 8;
-    return blockedEvents.map((event) => {
+    return blockedEvents.filter((event) => { 
+      return moment(event.start).hour() >= start && moment(event.end).hour() <= end;
+    }).map((event) => {
       const startTime = moment(event.start);
       const endTime = moment(event.end);
       const dayStartTime = startTime.clone().hour(start).minute(0);
@@ -207,6 +209,7 @@ const DayView = ({
 
   return (
     <ScrollView
+      bounces={false}
       contentContainerStyle={[styles.contentStyle, { width }]}
       showsVerticalScrollIndicator={false}
       contentOffset={{ y: contentOffset() }}
