@@ -159,12 +159,15 @@ const DayView = ({
     return blockedEvents.filter((event) => { 
       return moment(event.start).hour() >= start && moment(event.end).hour() <= end;
     }).map((event) => {
-      const startTime = moment(event.start);
-      const endTime = moment(event.end);
-      const dayStartTime = startTime.clone().hour(start).minute(0);
+      const eventStart = moment(event.start);
+      const eventEnd = moment(event.end);
+      const dayStartTime = eventStart.clone().hour(start).minute(0);
 
-      const top = startTime.diff(dayStartTime, 'minutes', true) * HEIGHT_PER_MINUTE;
-      const height = endTime.diff(startTime, 'minutes', true) * HEIGHT_PER_MINUTE;
+      const blockStart = eventStart.hour() < start ? dayStartTime : eventStart;
+      const blockEnd = eventEnd.hour() > end ? eventStart.clone().hour(end).minute(0) : eventEnd;
+
+      const top = blockStart.diff(dayStartTime, 'minutes', true) * HEIGHT_PER_MINUTE;
+      const height = blockEnd.diff(blockStart, 'minutes', true) * HEIGHT_PER_MINUTE;
 
 
       const rotatedLineWidth = rotatedLenght(lineWidth);
