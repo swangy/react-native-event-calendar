@@ -157,7 +157,7 @@ const DayView = ({
     const lineWidth = 4;
     const lineMargin = 8;
     return blockedEvents.filter((event) => { 
-      return moment(event.start).hour() >= start && moment(event.end).hour() <= end;
+      return moment(event.end).hour() >= start && moment(event.start).hour() <= end;
     }).map((event) => {
       const eventStart = moment(event.start);
       const eventEnd = moment(event.end);
