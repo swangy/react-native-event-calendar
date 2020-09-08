@@ -30,12 +30,14 @@ const DayView = ({
   start,
   styles,
   width,
-  refreshControl
+  refreshControl,
+  startKey,
+  endKey
 }) => {
   const containerWidth = width - LEFT_MARGIN;
   const blockedEvents = events.filter((e) => e.booking_type === 'blocked');
   const normalEvents = events.filter((e) => e.booking_type !== 'blocked');
-  const packedEvents = populateEvents(normalEvents, containerWidth, start);
+  const packedEvents = populateEvents(normalEvents, containerWidth, start, startKey, endKey);
   const scrollViewRef = useRef(null);
 
   const contentOffset = () => {
@@ -133,8 +135,8 @@ const DayView = ({
               ) : null}
               {numberOfLines > 2 ? (
                 <Text style={styles.eventTimes} numberOfLines={1}>
-                  {moment(event.start).format(formatTime)} - {' '}
-                  {moment(event.end).format(formatTime)}
+                  {moment(event[startKey]).format(formatTime)} - {' '}
+                  {moment(event[endKey]).format(formatTime)}
                 </Text>
               ) : null}
             </View>
@@ -157,10 +159,10 @@ const DayView = ({
     const lineWidth = 4;
     const lineMargin = 8;
     return blockedEvents.filter((event) => { 
-      return moment(event.end).hour() >= start && moment(event.start).hour() <= end;
+      return moment(event[endKey]).hour() >= start && moment(event[startKey]).hour() <= end;
     }).map((event) => {
-      const eventStart = moment(event.start);
-      const eventEnd = moment(event.end);
+      const eventStart = moment(event[startKey]);
+      const eventEnd = moment(event[endKey]);
       const dayStartTime = eventStart.clone().hour(start).minute(0);
 
       const blockStart = eventStart.hour() < start ? dayStartTime : eventStart;

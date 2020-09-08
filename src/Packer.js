@@ -7,36 +7,38 @@ const minutesPerBlock = 30;
 
 const heightPerMinute = blockHeight / minutesPerBlock;
 
-function buildEvent(column, left, width, dayStart, ) {
-  const startTime = moment(column.start);
-  const endTime = column.end
-    ? moment(column.end)
+function buildEvent(column, left, width, dayStart, startKey, endKey) {
+  const startTime = moment(column[startKey]);
+  const endTime = column[endKey]
+    ? moment(column[endKey])
     : startTime.clone().add(1, 'hour');
   const dayStartTime = startTime
     .clone()
     .hour(dayStart)
     .minute(0);
   const diffMinutes = startTime.diff(dayStartTime, 'minutes', true);
+  const positiveDiff = diffMinutes > 0;
 
-  column.top = diffMinutes * ( blockHeight / minutesPerBlock );
-  column.height = endTime.diff(startTime, 'minutes', true) * heightPerMinute;
+  column.top = (positiveDiff ? diffMinutes : 0) * ( blockHeight / minutesPerBlock );
+  column.height = (endTime.diff(startTime, 'minutes', true) + (positiveDiff ? 0 : diffMinutes)) * heightPerMinute
   column.width = width;
   column.left = left;
+
   return column;
 }
 
-function collision(a, b) {
-  return moment(a.end).isAfter(b.start) && moment(a.start).isBefore(b.end);
+function collision(a, b, startKey, endKey) {
+  return moment(a[endKey]).isAfter(b[startKey]) && moment(a[startKey]).isBefore(b[endKey]);
 }
 
-function expand(ev, column, columns) {
+function expand(ev, column, columns, startKey, endKey) {
   var colSpan = 1;
 
   for (var i = column + 1; i < columns.length; i++) {
     var col = columns[i];
     for (var j = 0; j < col.length; j++) {
       var ev1 = col[j];
-      if (collision(ev, ev1)) {
+      if (collision(ev, ev1, startKey, endKey)) {
         return colSpan;
       }
     }
@@ -46,7 +48,7 @@ function expand(ev, column, columns) {
   return colSpan;
 }
 
-function pack(columns, width, calculatedEvents, dayStart) {
+function pack(columns, width, calculatedEvents, dayStart, startKey, endKey) {
   var colLength = columns.length;
 
   for (var i = 0; i < colLength; i++) {
@@ -56,12 +58,12 @@ function pack(columns, width, calculatedEvents, dayStart) {
       var L = (i / colLength) * width;
       var W = (width * colSpan) / colLength - 10;
 
-      calculatedEvents.push(buildEvent(col[j], L, W, dayStart));
+      calculatedEvents.push(buildEvent(col[j], L, W, dayStart, startKey, endKey));
     }
   }
 }
 
-function populateEvents(events, screenWidth, dayStart) {
+function populateEvents(events, screenWidth, dayStart, startKey, endKey) {
   let lastEnd;
   let columns;
   let self = this;
@@ -71,8 +73,8 @@ function populateEvents(events, screenWidth, dayStart) {
   lastEnd = null;
 
   events.forEach(function(ev, index) {
-    if (lastEnd !== null && ev.start >= lastEnd) {
-      pack(columns, screenWidth, calculatedEvents, dayStart);
+    if (lastEnd !== null && ev[startKey] >= lastEnd) {
+      pack(columns, screenWidth, calculatedEvents, dayStart, startKey, endKey);
       columns = [];
       lastEnd = null;
     }
@@ -91,13 +93,13 @@ function populateEvents(events, screenWidth, dayStart) {
       columns.push([ev]);
     }
 
-    if (lastEnd === null || ev.end > lastEnd) {
-      lastEnd = ev.end;
+    if (lastEnd === null || ev[endKey] > lastEnd) {
+      lastEnd = ev[endKey];
     }
   });
 
   if (columns.length > 0) {
-    pack(columns, screenWidth, calculatedEvents, dayStart);
+    pack(columns, screenWidth, calculatedEvents, dayStart, startKey, endKey);
   }
   return calculatedEvents;
 }
