@@ -17,7 +17,7 @@ import {HEIGHT_PER_MINUTE} from './constants';
 
 export default class EventCalendar extends React.Component {
   static dateByIndex(index, initDate, size) {
-    return moment.utc(initDate).add(index - size, 'days');
+    return moment.utc(initDate).add(index - size, 'days').format('YYYY-MM-DD');
   }
 
   constructor(props) {
@@ -39,7 +39,7 @@ export default class EventCalendar extends React.Component {
 
   getItem(eventList, index) {
     const { initDate, size } = this.props;
-    const item = eventList[EventCalendar.dateByIndex(index, initDate, size).format('YYYY-MM-DD')] || [];
+    const item = eventList[EventCalendar.dateByIndex(index, initDate, size)] || [];
     return item;
   }
 
@@ -66,7 +66,7 @@ export default class EventCalendar extends React.Component {
       width, initDate, size, onDateChange,
     } = this.props;
     const index = Math.round(event.nativeEvent.contentOffset.x / width);
-    const date = EventCalendar.dateByIndex(index, initDate, size).format('YYYY-MM-DD');
+    const date = EventCalendar.dateByIndex(index, initDate, size);
     if (onDateChange) onDateChange(date);
   }
 
