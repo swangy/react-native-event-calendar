@@ -1,7 +1,6 @@
 // @flow
 import moment from 'moment';
 
-const offset = 100;
 const blockHeight = 100;
 const minutesPerBlock = 30;
 
@@ -28,7 +27,7 @@ function buildEvent(column, left, width, dayStart, startKey, endKey) {
 }
 
 function collision(a, b, startKey, endKey) {
-  return moment(a[endKey]).isAfter(b[startKey]) && moment(a[startKey]).isBefore(b[endKey]);
+  return a[endKey] > b[startKey] && a[startKey] < b[endKey];
 }
 
 function expand(ev, column, columns, startKey, endKey) {
@@ -54,7 +53,7 @@ function pack(columns, width, calculatedEvents, dayStart, startKey, endKey) {
   for (var i = 0; i < colLength; i++) {
     var col = columns[i];
     for (var j = 0; j < col.length; j++) {
-      var colSpan = expand(col[j], i, columns);
+      var colSpan = expand(col[j], i, columns, startKey, endKey);
       var L = (i / colLength) * width;
       var W = (width * colSpan) / colLength - 10;
 
@@ -69,6 +68,16 @@ function populateEvents(events, screenWidth, dayStart, startKey, endKey) {
   let self = this;
   let calculatedEvents = [];
 
+  events = events
+    .map((ev, index) => ({ ...ev, index: index }))
+    .sort(function(a, b) {
+      if (a[startKey] < b[startKey]) return -1;
+      if (a[startKey] > b[startKey]) return 1;
+      if (a[endKey] < b[endKey]) return -1;
+      if (a[endKey] > b[endKey]) return 1;
+      return 0;
+    });
+
   columns = [];
   lastEnd = null;
 
@@ -82,7 +91,7 @@ function populateEvents(events, screenWidth, dayStart, startKey, endKey) {
     var placed = false;
     for (var i = 0; i < columns.length; i++) {
       var col = columns[i];
-      if (!collision(col[col.length - 1], ev)) {
+      if (!collision(col[col.length - 1], ev, startKey, endKey)) {
         col.push(ev);
         placed = true;
         break;
