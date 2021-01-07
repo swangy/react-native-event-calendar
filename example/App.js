@@ -1,112 +1,105 @@
 import React from 'react';
-import { Dimensions, View } from 'react-native';
+import { Button, Dimensions, Text, TextInput, View } from 'react-native';
 
-import EventCalendar from '@agendapro/react-native-events-calendar';
+import EventCalendar from './src/EventCalendar';
 
 let { width } = Dimensions.get('window');
+
+function addZero(number) {
+  return number >= 10 ? number : `0${number}`;
+}
+
+function generateDate(date, hour, min) {
+  return `${date.getFullYear()}-${addZero(date.getMonth() + 1)}-${addZero(date.getDate())} ${addZero(hour)}:${addZero(min)}:00`;
+}
+
+function generateDateKey(date) {
+  return `${date.getFullYear()}-${addZero(date.getMonth() + 1)}-${addZero(date.getDate())}`
+}
+
+
+function generateEvents(days) {
+  const events = {};
+  const currentDate = new Date('2017-09-06');
+  for (let day = 0; day < days; day++) {
+    dayEvents = []
+     for (let hour = 0; hour < 22; hour++) {
+      
+      dayEvents.push({
+        start: generateDate(currentDate, hour, 0),
+        end: generateDate(currentDate, hour +1, 0),
+      })
+
+      dayEvents.push({
+        start: generateDate(currentDate, hour, 0),
+        end: generateDate(currentDate, hour, 30),
+      })
+
+      dayEvents.push({
+        start: generateDate(currentDate, hour, 30),
+        end: generateDate(currentDate, hour + 1, 0),
+      })
+       
+    }
+
+    events[generateDateKey(currentDate)] = dayEvents;
+    currentDate.setTime(currentDate.getTime() + (24*60*60*1000))
+  }
+
+  return events;
+}
 
 export default class App extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      events: [
-        {
-          start: '2017-09-06 22:30:00',
-          end: '2017-09-06 23:30:00',
-          title: 'Dr. Mariana Joseph',
-          summary: '3412 Piedmont Rd NE, GA 3032',
-          color: 'green',
-        },
-        {
-          start: '2017-09-07 00:30:00',
-          end: '2017-09-07 01:30:00',
-          title: 'Dr. Mariana Joseph',
-          summary: '3412 Piedmont Rd NE, GA 3032',
-        },
-        {
-          start: '2017-09-07 01:30:00',
-          end: '2017-09-07 02:20:00',
-          title: 'Dr. Mariana Joseph',
-          summary: '3412 Piedmont Rd NE, GA 3032',
-        },
-        {
-          start: '2017-09-07 04:10:00',
-          end: '2017-09-07 04:40:00',
-          title: 'Dr. Mariana Joseph',
-          summary: '3412 Piedmont Rd NE, GA 3032',
-        },
-        {
-          start: '2017-09-07 01:05:00',
-          end: '2017-09-07 01:45:00',
-          title: 'Dr. Mariana Joseph',
-          summary: '3412 Piedmont Rd NE, GA 3032',
-        },
-        {
-          start: '2017-09-07 14:30:00',
-          end: '2017-09-07 16:30:00',
-          title: 'Dr. Mariana Joseph',
-          summary: '3412 Piedmont Rd NE, GA 3032',
-        },
-        {
-          start: '2017-09-08 01:20:00',
-          end: '2017-09-08 02:20:00',
-          title: 'Dr. Mariana Joseph',
-          summary: '3412 Piedmont Rd NE, GA 3032',
-        },
-        {
-          start: '2017-09-08 04:10:00',
-          end: '2017-09-08 04:40:00',
-          title: 'Dr. Mariana Joseph',
-          summary: '3412 Piedmont Rd NE, GA 3032',
-        },
-        {
-          start: '2017-09-08 00:45:00',
-          end: '2017-09-08 01:45:00',
-          title: 'Dr. Mariana Joseph',
-          summary: '3412 Piedmont Rd NE, GA 3032',
-        },
-        {
-          start: '2017-09-08 11:30:00',
-          end: '2017-09-08 12:30:00',
-          title: 'Dr. Mariana Joseph',
-          summary: '3412 Piedmont Rd NE, GA 3032',
-        },
-        {
-          start: '2017-09-09 01:30:00',
-          end: '2017-09-09 02:00:00',
-          title: 'Dr. Mariana Joseph',
-          summary: '3412 Piedmont Rd NE, GA 3032',
-        },
-        {
-          start: '2017-09-09 03:10:00',
-          end: '2017-09-09 03:40:00',
-          title: 'Dr. Mariana Joseph',
-          summary: '3412 Piedmont Rd NE, GA 3032',
-        },
-        {
-          start: '2017-09-09 00:10:00',
-          end: '2017-09-09 01:45:00',
-          title: 'Dr. Mariana Joseph',
-          summary: '3412 Piedmont Rd NE, GA 3032',
-        },
-        {
-          start: '2017-09-10 12:10:00',
-          end: '2017-09-10 13:45:00',
-          title: 'Dr. Mariana Joseph',
-          summary: '3412 Piedmont Rd NE, GA 3032',
-        },
-      ],
+      events: generateEvents(10),
+      date: '2017-09-07',
+      goToDate: '',
     };
+
+    this.calendarRef = React.createRef();
+
+
+    this.onDateChange = this.onDateChange.bind(this);
+    this.onChangeText = this.onChangeText.bind(this);
+    this.goToDate = this.goToDate.bind(this);
   }
 
   _eventTapped(event) {
     alert(JSON.stringify(event));
   }
 
+  renderEvent(event) {
+    return (
+      <View>
+        <Text>{event.start}</Text>
+      </View>
+    );
+  }
+
+  onDateChange(date) {
+    this.setState({date})
+  };
+
+  onChangeText(date) {
+    this.setState({goToDate: date})
+  }
+
+  goToDate() {
+    this.calendarRef.current.goToDate(this.state.goToDate);
+  }
+
   render() {
     return (
-      <View style={{ flex: 1, marginTop: 20 }}>
+      <View style={{ flex: 1, marginTop: 40 }}>
+        <Text style={{textAlign: 'center'}}>{this.state.date}</Text>
+        <View style={{}}>
+          <TextInput value={this.state.goToDate} onChangeText={this.onChangeText}/>
+          <Button title="Ir" onPress={this.goToDate}/>
+        </View>
         <EventCalendar
+          mode="daily"
           eventTapped={this._eventTapped.bind(this)}
           events={this.state.events}
           width={width}
@@ -115,8 +108,15 @@ export default class App extends React.Component {
           upperCaseHeader
           uppercase
           scrollToFirst={false}
+          renderEvent={this.renderEvent}
+          startKey="start"
+          endKey='end'
+          onDateChange={this.onDateChange}
+          ref={this.calendarRef}
         />
       </View>
     );
   }
 }
+
+
