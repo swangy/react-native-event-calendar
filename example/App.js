@@ -10,7 +10,7 @@ function addZero(number) {
 }
 
 function generateDate(date, hour, min) {
-  return `${date.getFullYear()}-${addZero(date.getMonth() + 1)}-${addZero(date.getDate())} ${addZero(hour)}:${addZero(min)}:00`;
+  return `${date.getFullYear()}-${addZero(date.getMonth() + 1)}-${addZero(date.getDate())}T${addZero(hour)}:${addZero(min)}:00`;
 }
 
 function generateDateKey(date) {
@@ -113,6 +113,8 @@ export default class App extends React.Component {
           endKey='end'
           onDateChange={this.onDateChange}
           ref={this.calendarRef}
+          onEventTapped={() => {}}
+          orderEvents={false}
         />
       </View>
     );

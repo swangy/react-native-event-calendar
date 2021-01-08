@@ -74,7 +74,7 @@ export default class EventCalendar extends React.Component {
     const {
       initDate, size, formatHeader, width,
       format24h, headerStyle, renderEvent, onEventTapped, scrollToFirst, start, end,
-      refreshControl, startKey, endKey
+      refreshControl, startKey, endKey, orderEvents
     } = this.props;
     const date = EventCalendar.dateByIndex(index, initDate, size);
 
@@ -97,6 +97,7 @@ export default class EventCalendar extends React.Component {
           refreshControl={refreshControl}
           startKey={startKey}
           endKey={endKey}
+          orderEvents={orderEvents}
         />
       </View>
     );
@@ -108,8 +109,8 @@ export default class EventCalendar extends React.Component {
       <View style={[this.calendarStyle.container, { width }]}>
         <VirtualizedList
           ref={this.calendarRef}
-          windowSize={9}
-          initialNumToRender={9}
+          windowSize={10}
+          initialNumToRender={5}
           initialScrollIndex={size}
           data={events}
           getItemCount={() => size * 2}

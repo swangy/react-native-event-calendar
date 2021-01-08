@@ -32,7 +32,8 @@ const DayView = ({
   width,
   refreshControl,
   startKey,
-  endKey
+  endKey,
+  orderEvents = true,
 }) => {
   const containerWidth = width - LEFT_MARGIN;
   const blockedEvents = events.filter((e) => e.booking_type === 'blocked');

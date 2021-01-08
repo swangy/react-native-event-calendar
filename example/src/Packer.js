@@ -1,25 +1,29 @@
 // @flow
-import moment from 'moment';
 
 const blockHeight = 100;
 const minutesPerBlock = 30;
 
 const heightPerMinute = blockHeight / minutesPerBlock;
 
+function diffInMInutes(dateA, dateB) {
+  return (dateA.getTime() - dateB.getTime()) / (1000 * 60)
+}
+
 function buildEvent(column, left, width, dayStart, startKey, endKey) {
-  const startTime = moment(column[startKey]);
+  const startTime = new Date(column[startKey]);
   const endTime = column[endKey]
-    ? moment(column[endKey])
-    : startTime.clone().add(1, 'hour');
-  const dayStartTime = startTime
-    .clone()
-    .hour(dayStart)
-    .minute(0);
-  const diffMinutes = startTime.diff(dayStartTime, 'minutes', true);
+    ? new Date(column[endKey])
+    : new Date(startTime.getTime() + (1000 * 60 * 60))
+  const dayStartTime = new Date(startTime.getTime())
+  dayStartTime.setHours(dayStart)
+  dayStartTime.setMinutes(0)
+
+  
+  const diffMinutes = diffInMInutes(startTime, dayStartTime)
   const positiveDiff = diffMinutes > 0;
 
   column.top = (positiveDiff ? diffMinutes : 0) * ( blockHeight / minutesPerBlock );
-  column.height = (endTime.diff(startTime, 'minutes', true) + (positiveDiff ? 0 : diffMinutes)) * heightPerMinute
+  column.height = (diffInMInutes(endTime, startTime) + (positiveDiff ? 0 : diffMinutes)) * heightPerMinute
   column.width = width;
   column.left = left;
 
@@ -62,21 +66,23 @@ function pack(columns, width, calculatedEvents, dayStart, startKey, endKey) {
   }
 }
 
-function populateEvents(events, screenWidth, dayStart, startKey, endKey) {
+function populateEvents(events, screenWidth, dayStart, startKey, endKey, orderEvents) {
   let lastEnd;
   let columns;
   let self = this;
   let calculatedEvents = [];
 
-  events = events
-    // .map((ev, index) => ({ ...ev, index: index }))
-    .sort(function(a, b) {
-      if (a[startKey] < b[startKey]) return -1;
-      if (a[startKey] > b[startKey]) return 1;
-      if (a[endKey] < b[endKey]) return -1;
-      if (a[endKey] > b[endKey]) return 1;
-      return 0;
-    });
+  if(orderEvents) {
+    events = events
+      .sort(function(a, b) {
+        if (a[startKey] < b[startKey]) return -1;
+        if (a[startKey] > b[startKey]) return 1;
+        if (a[endKey] < b[endKey]) return -1;
+        if (a[endKey] > b[endKey]) return 1;
+        return 0;
+      });
+  }
+
 
   columns = [];
   lastEnd = null;
