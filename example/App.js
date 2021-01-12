@@ -1,7 +1,8 @@
-import React from 'react';
-import { Button, Dimensions, Text, TextInput, View } from 'react-native';
+import React, { useRef, useState } from 'react';
+import { Button, Dimensions, SafeAreaView, Text, TextInput, useWindowDimensions, View } from 'react-native';
 
 import EventCalendar from './src/EventCalendar';
+import EventCalendarFunctional from './src/EventCalendarFunctional';
 
 let { width } = Dimensions.get('window');
 
@@ -19,106 +20,131 @@ function generateDateKey(date) {
 
 
 function generateEvents(days) {
-  const events = {};
-  const currentDate = new Date('2017-09-06');
+  const events = [];
+  const currentDate = new Date('2017-09-06T00:00:00');
   for (let day = 0; day < days; day++) {
-    dayEvents = []
-     for (let hour = 0; hour < 22; hour++) {
-      
-      dayEvents.push({
-        start: generateDate(currentDate, hour, 0),
-        end: generateDate(currentDate, hour +1, 0),
-      })
-
-      dayEvents.push({
-        start: generateDate(currentDate, hour, 0),
-        end: generateDate(currentDate, hour, 30),
-      })
-
-      dayEvents.push({
-        start: generateDate(currentDate, hour, 30),
-        end: generateDate(currentDate, hour + 1, 0),
-      })
-       
-    }
-
-    events[generateDateKey(currentDate)] = dayEvents;
+    events.push({
+      events: generateEventsByDate(currentDate),
+      date: generateDateKey(currentDate)
+    })
     currentDate.setTime(currentDate.getTime() + (24*60*60*1000))
   }
 
   return events;
 }
 
-export default class App extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      events: generateEvents(10),
-      date: '2017-09-07',
-      goToDate: '',
-    };
-
-    this.calendarRef = React.createRef();
-
-
-    this.onDateChange = this.onDateChange.bind(this);
-    this.onChangeText = this.onChangeText.bind(this);
-    this.goToDate = this.goToDate.bind(this);
+function generateEventsHash(days) {
+  const events = {};
+  const currentDate = new Date('2017-09-06T00:00:00');
+  for (let day = 0; day < days; day++) {
+    events[generateDateKey(currentDate)] = generateEventsByDate(currentDate)
+    currentDate.setTime(currentDate.getTime() + (24*60*60*1000))
   }
 
-  _eventTapped(event) {
-    alert(JSON.stringify(event));
+  return events;
+}
+
+const generateEventsByDate = (date) => {
+
+  const dayEvents = []
+  for (let hour = 0; hour < 22; hour++) {
+      
+    dayEvents.push({
+      start: generateDate(date, hour, 0),
+      end: generateDate(date, hour +1, 0),
+    })
+
+    dayEvents.push({
+      start: generateDate(date, hour, 0),
+      end: generateDate(date, hour, 30),
+    })
+
+    dayEvents.push({
+      start: generateDate(date, hour, 30),
+      end: generateDate(date, hour + 1, 0),
+    })
+     
   }
 
-  renderEvent(event) {
+  return dayEvents;
+}
+
+const App = () =>  {
+ 
+  const [events, setEvents] = useState(generateEvents(10))
+  const [date, setDate] = useState('2017-09-07')
+  const [goToDate, setGoToDate] = useState('')
+
+  const calendarRef = useRef(null)
+
+  const window = useWindowDimensions()
+
+
+  const renderEvent =(event) => {
     return (
       <View>
-        <Text>{event.start}</Text>
+        <Text>{event.date}</Text>
       </View>
     );
   }
 
-  onDateChange(date) {
-    this.setState({date})
-  };
-
-  onChangeText(date) {
-    this.setState({goToDate: date})
+  const addEventStart = () => {
+    const addDate = new Date(`${goToDate}T00:00:00`)
+    const event = {
+      events: generateEventsByDate(addDate),
+      date: generateDateKey(addDate)
+    }
+    const newEvents = events.slice()
+    newEvents.unshift(event)
+    setEvents(newEvents)
   }
 
-  goToDate() {
-    this.calendarRef.current.goToDate(this.state.goToDate);
+  // const onDateChange = (date) => {
+  //   this.setState({date})
+  // };
+
+  // onChangeText(date) {
+  //   this.setState({goToDate: date})
+  // }
+
+  const onPressHandler = () => {
+    calendarRef.current.goToDate(goToDate);
   }
 
-  render() {
-    return (
-      <View style={{ flex: 1, marginTop: 40 }}>
-        <Text style={{textAlign: 'center'}}>{this.state.date}</Text>
-        <View style={{}}>
-          <TextInput value={this.state.goToDate} onChangeText={this.onChangeText}/>
-          <Button title="Ir" onPress={this.goToDate}/>
-        </View>
-        <EventCalendar
-          mode="daily"
-          eventTapped={this._eventTapped.bind(this)}
-          events={this.state.events}
-          width={width}
-          initDate={'2017-09-07'}
-          scrollToFirst
-          upperCaseHeader
-          uppercase
-          scrollToFirst={false}
-          renderEvent={this.renderEvent}
-          startKey="start"
-          endKey='end'
-          onDateChange={this.onDateChange}
-          ref={this.calendarRef}
-          onEventTapped={() => {}}
-          orderEvents={false}
-        />
+  const onEventTapped = () => {};
+
+  return (
+    <SafeAreaView style={{flex: 1}}>
+      <Text style={{textAlign: 'center'}}>{date}</Text>
+      <View style={{}}>
+        <TextInput value={goToDate} onChangeText={setGoToDate}/>
+        <Button title="Ir" onPress={onPressHandler} />
+        <Button title="Add" onPress={addEventStart} />
       </View>
-    );
-  }
+      {/* <EventCalendarFunctional
+        events={events}
+        width={window.width}
+        onDateChange={setDate}
+        initDate={date}
+        ref={calendarRef}
+      /> */}
+      <EventCalendar
+        events={events}
+        width={window.width}
+        onEventTapped={onEventTapped}
+        renderEvent={renderEvent}
+        onDateChange={setDate}
+        startKey="start"
+        endKey="end"
+        orderEvents={false}
+        initDate={date}
+        ref={calendarRef}
+
+      />
+    </SafeAreaView>
+  );
 }
+
+export default App;
 
 
