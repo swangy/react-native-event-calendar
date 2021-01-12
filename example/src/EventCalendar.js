@@ -16,7 +16,6 @@ import styleConstructor from './style';
 
 import DayView from './DayView';
 import {HEIGHT_PER_MINUTE} from './constants';
-import EventCalendarFunctional from './EventCalendarFunctional';
 
 const DAY_IN_MILISECONDS = 86400000
 export default class EventCalendar extends React.Component {
@@ -93,15 +92,11 @@ export default class EventCalendar extends React.Component {
   }
 
   goToDate(date) {
-    const { initDate, size } = this.props;
-    const earliestDate = moment.utc(initDate).subtract(size, 'days');
-    const index = moment.utc(date).diff(earliestDate, 'days');
-    this.goToPage(index);
+    this.goToPage(EventCalendar.indexByDate(this.state.events, date));
   }
 
   goToPage(index) {
-    const { size } = this.props;
-    if (index <= 0 || index >= size * 2) return;
+    if (index < 0 || index >= this.state.events.length) return;
     this.calendarRef.current.scrollToIndex({ index, animated: false });
   }
 
@@ -164,8 +159,8 @@ export default class EventCalendar extends React.Component {
       <View style={[this.calendarStyle.container, { width }]}>
         <FlatList
           ref={this.calendarRef}
-          windowSize={5}
-          initialNumToRender={1}
+          windowSize={8}
+          initialNumToRender={3}
           initialScrollIndex={this.state.initialIndex}
           data={this.state.events}
           keyExtractor={this.keyExtractor}

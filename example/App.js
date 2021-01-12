@@ -2,7 +2,6 @@ import React, { useRef, useState } from 'react';
 import { Button, Dimensions, SafeAreaView, Text, TextInput, useWindowDimensions, View } from 'react-native';
 
 import EventCalendar from './src/EventCalendar';
-import EventCalendarFunctional from './src/EventCalendarFunctional';
 
 let { width } = Dimensions.get('window');
 
@@ -121,13 +120,6 @@ const App = () =>  {
         <Button title="Ir" onPress={onPressHandler} />
         <Button title="Add" onPress={addEventStart} />
       </View>
-      {/* <EventCalendarFunctional
-        events={events}
-        width={window.width}
-        onDateChange={setDate}
-        initDate={date}
-        ref={calendarRef}
-      /> */}
       <EventCalendar
         events={events}
         width={window.width}
