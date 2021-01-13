@@ -20,7 +20,7 @@ function generateDateKey(date) {
 
 function generateEvents(days) {
   const events = [];
-  const currentDate = new Date('2017-09-06T00:00:00');
+  const currentDate = new Date('2021-01-11T00:00:00');
   for (let day = 0; day < days; day++) {
     events.push({
       events: generateEventsByDate(currentDate),
@@ -34,7 +34,7 @@ function generateEvents(days) {
 
 function generateEventsHash(days) {
   const events = {};
-  const currentDate = new Date('2017-09-06T00:00:00');
+  const currentDate = new Date('2021-01-11T00:00:00');
   for (let day = 0; day < days; day++) {
     events[generateDateKey(currentDate)] = generateEventsByDate(currentDate)
     currentDate.setTime(currentDate.getTime() + (24*60*60*1000))
@@ -71,7 +71,7 @@ const generateEventsByDate = (date) => {
 const App = () =>  {
  
   const [events, setEvents] = useState(generateEvents(10))
-  const [date, setDate] = useState('2017-09-07')
+  const [date, setDate] = useState('2021-01-11')
   const [goToDate, setGoToDate] = useState('')
 
   const calendarRef = useRef(null)
@@ -79,10 +79,10 @@ const App = () =>  {
   const window = useWindowDimensions()
 
 
-  const renderEvent =(event) => {
+  const renderEvent = (event) => {
     return (
       <View>
-        <Text>{event.date}</Text>
+        <Text>{event.start}</Text>
       </View>
     );
   }

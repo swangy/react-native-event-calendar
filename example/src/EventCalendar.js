@@ -112,45 +112,35 @@ export default class EventCalendar extends React.Component {
     this.props.onDateChange(date)
   }
 
-  // renderItem({ index, item }) {
-  //   const {
-  //     initDate, size, formatHeader, width,
-  //     format24h, headerStyle, renderEvent, onEventTapped, scrollToFirst, start, end,
-  //     refreshControl, startKey, endKey
-  //   } = this.props;
-  //   const date = EventCalendar.dateByIndex(index, initDate, size);
+  renderItem({ index, item }) {
+    const {
+      formatHeader, width,
+      format24h, headerStyle, renderEvent, onEventTapped, scrollToFirst, start, end,
+      refreshControl, startKey, endKey
+    } = this.props;
 
-  //   return (
-  //     <View style={[this.calendarStyle.container, { width }]}>
-  //       <DayView
-  //         date={date}
-  //         index={index}
-  //         format24h={format24h}
-  //         formatHeader={formatHeader}
-  //         headerStyle={headerStyle}
-  //         renderEvent={renderEvent}
-  //         onEventTapped={onEventTapped}
-  //         events={item}
-  //         width={width}
-  //         styles={this.calendarStyle}
-  //         scrollToFirst={scrollToFirst}
-  //         start={start}
-  //         end={end}
-  //         refreshControl={refreshControl}
-  //         startKey={startKey}
-  //         endKey={endKey}
-  //       />
-  //     </View>
-  //   );
-  // }
-
-  renderItem({item}) {
-    const {width} = this.props;
     return (
-      <View style={[styles.itemContainer, {width}]}>
-        <Text>{item.date}</Text>
+      <View style={[this.calendarStyle.container, { width }]}>
+        <DayView
+          date={item.date}
+          index={index}
+          format24h={format24h}
+          formatHeader={formatHeader}
+          headerStyle={headerStyle}
+          renderEvent={renderEvent}
+          onEventTapped={onEventTapped}
+          events={item.events}
+          width={width}
+          styles={this.calendarStyle}
+          scrollToFirst={scrollToFirst}
+          start={start}
+          end={end}
+          refreshControl={refreshControl}
+          startKey={startKey}
+          endKey={endKey}
+        />
       </View>
-    )
+    );
   }
 
   render() {
