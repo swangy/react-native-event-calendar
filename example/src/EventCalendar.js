@@ -120,26 +120,24 @@ export default class EventCalendar extends React.Component {
     } = this.props;
 
     return (
-      <View style={[this.calendarStyle.container, { width }]}>
-        <DayView
-          date={item.date}
-          index={index}
-          format24h={format24h}
-          formatHeader={formatHeader}
-          headerStyle={headerStyle}
-          renderEvent={renderEvent}
-          onEventTapped={onEventTapped}
-          events={item.events}
-          width={width}
-          styles={this.calendarStyle}
-          scrollToFirst={scrollToFirst}
-          start={start}
-          end={end}
-          refreshControl={refreshControl}
-          startKey={startKey}
-          endKey={endKey}
-        />
-      </View>
+      <DayView
+        date={item.date}
+        index={index}
+        format24h={format24h}
+        formatHeader={formatHeader}
+        headerStyle={headerStyle}
+        renderEvent={renderEvent}
+        onEventTapped={onEventTapped}
+        events={item.events}
+        width={width}
+        styles={this.calendarStyle}
+        scrollToFirst={scrollToFirst}
+        start={start}
+        end={end}
+        refreshControl={refreshControl}
+        startKey={startKey}
+        endKey={endKey}
+      />
     );
   }
 
@@ -150,7 +148,7 @@ export default class EventCalendar extends React.Component {
         <FlatList
           ref={this.calendarRef}
           windowSize={8}
-          initialNumToRender={3}
+          initialNumToRender={1}
           initialScrollIndex={this.state.initialIndex}
           data={this.state.events}
           keyExtractor={this.keyExtractor}

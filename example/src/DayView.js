@@ -25,7 +25,6 @@ const DayView = ({
   end,
   events,
   format24h,
-  index,
   onEventTapped,
   renderEvent,
   start,
@@ -34,7 +33,7 @@ const DayView = ({
   refreshControl,
   startKey,
   endKey,
-  orderEvents = true,
+  orderEvents,
 }) => {
   const containerWidth = width - LEFT_MARGIN;
   const blockedEvents = events.filter((e) => e.booking_type === 'blocked');
@@ -222,18 +221,20 @@ const DayView = ({
   };
 
   return (
-    <ScrollView
-      contentContainerStyle={[styles.contentStyle, { width }]}
-      showsVerticalScrollIndicator={false}
-      contentOffset={{ y: contentOffset() }}
-      ref={scrollViewRef}
-      refreshControl={refreshControl}
-    >
-      {renderBlocks()}
-      {renderLines()}
-      {renderEvents()}
-      {renderRedLine()}
-    </ScrollView>
+    <View style={{ flex:1, width }}>
+      <ScrollView
+        contentContainerStyle={[styles.contentStyle, { width }]}
+        showsVerticalScrollIndicator={false}
+        contentOffset={{ y: contentOffset() }}
+        ref={scrollViewRef}
+        refreshControl={refreshControl}
+      >
+        {renderBlocks()}
+        {renderLines()}
+        {renderEvents()}
+        {renderRedLine()}
+      </ScrollView>
+    </View>
   );
 };
 
