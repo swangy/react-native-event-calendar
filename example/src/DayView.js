@@ -20,7 +20,7 @@ function range(from, to) {
 }
 
 
-const DayView = ({
+const DayView = React.forwardRef(({
   date,
   end,
   events,
@@ -34,7 +34,9 @@ const DayView = ({
   startKey,
   endKey,
   orderEvents,
-}) => {
+  onMomentumScrollEnd,
+  onScrollEndDrag
+}, scrollRef) => {
   const containerWidth = width - LEFT_MARGIN;
   const blockedEvents = events.filter((e) => e.booking_type === 'blocked');
   const normalEvents = events.filter((e) => e.booking_type !== 'blocked');
@@ -224,10 +226,13 @@ const DayView = ({
     <View style={{ flex:1, width }}>
       <ScrollView
         contentContainerStyle={[styles.contentStyle, { width }]}
-        showsVerticalScrollIndicator={false}
+        showsVerticalScrollIndicator={true}
         contentOffset={{ y: contentOffset() }}
         ref={scrollViewRef}
         refreshControl={refreshControl}
+        onMomentumScrollEnd={onMomentumScrollEnd}
+        onScrollEndDrag={onScrollEndDrag}
+        ref={scrollRef}
       >
         {renderBlocks()}
         {renderLines()}
@@ -236,7 +241,7 @@ const DayView = ({
       </ScrollView>
     </View>
   );
-};
+});
 
 const arePropsEqual = (prevProps, nextProps) => {
   return prevProps.events === nextProps.events; 

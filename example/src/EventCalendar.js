@@ -48,10 +48,18 @@ export default class EventCalendar extends React.Component {
 
     const initialIndex = EventCalendar.indexByDate(props.events, props.initDate);
 
+    const refArray = []
+
+    for (let index = 0; index < props.events.length; index++) {
+      refArray.push(React.createRef())
+    }
+
     this.state = {
       currentDate: props.initDate,
       currentIndex: initialIndex,
       initialIndex: initialIndex,
+      currentY: 0,
+      refArray,
     }
 
 
@@ -61,6 +69,8 @@ export default class EventCalendar extends React.Component {
     this.getItemLayout = this.getItemLayout.bind(this);
     this.renderItem = this.renderItem.bind(this);
     this.onScrollHandler = this.onScrollHandler.bind(this);
+    this.onScrollEndHandler = this.onScrollEndHandler.bind(this);
+    this.syncVerticalPosition = this.syncVerticalPosition.bind(this);
   }
 
   static getDerivedStateFromProps(props, state) {
@@ -71,10 +81,25 @@ export default class EventCalendar extends React.Component {
     }
   }
 
-  componentDidUpdate(prevProps) {
+  syncVerticalPosition(index) {
+    if (index < 0 || index > (this.state.refArray.length -1 )) return;
+    this.state.refArray[index].current.scrollTo({y: this.state.currentY, animated: false})
+  }
+
+  componentDidUpdate(prevProps, prevState) {
+
     if(prevProps.events !== this.props.events) {
-      console.log("Update!")
       this.calendarRef.current.scrollToIndex({animated: false, index: this.state.currentIndex})
+    }
+
+    if(prevState.currentY !== this.state.currentY) {
+      this.syncVerticalPosition(this.state.currentIndex + 1)
+      this.syncVerticalPosition(this.state.currentIndex - 1)
+    }
+
+    if(prevState.currentIndex !== this.state.currentIndex) {
+      this.syncVerticalPosition(this.state.currentIndex + 1)
+      this.syncVerticalPosition(this.state.currentIndex - 1)
     }
   }
 
@@ -112,6 +137,10 @@ export default class EventCalendar extends React.Component {
     this.props.onDateChange(date)
   }
 
+  onScrollEndHandler(event) {
+    this.setState({currentY: event.nativeEvent.contentOffset.y})
+  }
+
   renderItem({ index, item }) {
     const {
       formatHeader, width,
@@ -137,6 +166,9 @@ export default class EventCalendar extends React.Component {
         refreshControl={refreshControl}
         startKey={startKey}
         endKey={endKey}
+        onMomentumScrollEnd={this.onScrollEndHandler}
+        onScrollEndDrag={this.onScrollEndHandler}
+        ref={this.state.refArray[index]}
       />
     );
   }
