@@ -5,7 +5,7 @@ import moment from 'moment';
 import _ from 'lodash';
 import populateEvents from './Packer';
 import {MINUTES_PER_BLOCK, BLOCK_HEIGHT, HEIGHT_PER_MINUTE} from './constants';
-import { newDate, format24 } from './utils';
+import { newDate, format24, nowTop } from './utils';
 
 const LEFT_MARGIN = 60 - 1;
 // const RIGHT_MARGIN = 10
@@ -35,34 +35,21 @@ const DayView = React.forwardRef(({
   endKey,
   orderEvents,
   onMomentumScrollEnd,
-  onScrollEndDrag
+  onScrollEndDrag,
+  contentOffset
 }, scrollRef) => {
   const containerWidth = width - LEFT_MARGIN;
   const blockedEvents = events.filter((e) => e.booking_type === 'blocked');
   const normalEvents = events.filter((e) => e.booking_type !== 'blocked');
-  const packedEvents = populateEvents(normalEvents, containerWidth, start, startKey, endKey);
-  const scrollViewRef = useRef(null);
-
-  const contentOffset = () => {
-    const nowHour = new Date().getHours()
-    if ((nowHour < (start + 1)) || (nowHour > (end + 1))) return 0;
-    return nowTop() - 100;
-  };
+  const packedEvents = populateEvents(normalEvents, containerWidth, start, startKey, endKey, orderEvents);
 
   useEffect(() => {
     if (Platform.OS === 'ios') return;
     setTimeout(() => {
-      if (!scrollViewRef.current) return;
-      scrollViewRef.current.scrollTo({ y: contentOffset(), animated: false });
+      if (!scrollRef.current) return;
+      scrollRef.current.scrollTo({ y: contentOffset, animated: false });
     }, 0);
   }, []);
-
-  const nowTop = () => {
-    const now = new Date()
-    const nowInMinutes = now.getHours() * 60 + now.getMinutes();
-    const startInMinutes = start * 60;
-    return ((nowInMinutes - startInMinutes) / MINUTES_PER_BLOCK) * BLOCK_HEIGHT;
-  };
 
   const renderRedLine = () => {
     const now = new Date();
@@ -71,7 +58,7 @@ const DayView = React.forwardRef(({
          || now.getMonth() !== dateObject.getMonth() 
          || now.getFullYear() !== dateObject.getFullYear()) { return null };
 
-    const top = nowTop();
+    const top = nowTop(start);
     const lineWidth = width - 20;
     return (
       <>
@@ -227,8 +214,7 @@ const DayView = React.forwardRef(({
       <ScrollView
         contentContainerStyle={[styles.contentStyle, { width }]}
         showsVerticalScrollIndicator={true}
-        contentOffset={{ y: contentOffset() }}
-        ref={scrollViewRef}
+        contentOffset={{ y: contentOffset }}
         refreshControl={refreshControl}
         onMomentumScrollEnd={onMomentumScrollEnd}
         onScrollEndDrag={onScrollEndDrag}

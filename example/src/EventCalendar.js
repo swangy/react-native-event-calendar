@@ -16,6 +16,7 @@ import styleConstructor from './style';
 
 import DayView from './DayView';
 import {HEIGHT_PER_MINUTE} from './constants';
+import { nowTop } from './utils';
 
 const DAY_IN_MILISECONDS = 86400000
 export default class EventCalendar extends React.Component {
@@ -41,25 +42,34 @@ export default class EventCalendar extends React.Component {
 
   static dateByIndex(events, index) { return events[index].date }
 
+  static generateRefArray(length) {
+    const refArray = []
+    for (let index = 0; index < length; index++) {
+      refArray.push(React.createRef())
+    }
+    return refArray
+  }
+
+  static currentHourOffset = (start, end) => {
+    const nowHour = new Date().getHours()
+    if ((nowHour < (start + 1)) || (nowHour > (end + 1))) return 0;
+    return nowTop(start) - 100;
+  };
+
   constructor(props) {
     super(props);
     const start = props.start || 0;
     const end = props.end || 24;
 
     const initialIndex = EventCalendar.indexByDate(props.events, props.initDate);
-
-    const refArray = []
-
-    for (let index = 0; index < props.events.length; index++) {
-      refArray.push(React.createRef())
-    }
-
+  
     this.state = {
       currentDate: props.initDate,
       currentIndex: initialIndex,
       initialIndex: initialIndex,
-      currentY: 0,
-      refArray,
+      currentY: EventCalendar.currentHourOffset(start, end),
+      events: props.events,
+      refArray: EventCalendar.generateRefArray(props.events.length)
     }
 
 
@@ -78,6 +88,7 @@ export default class EventCalendar extends React.Component {
     return {
       events: props.events,
       currentIndex: EventCalendar.indexByDate(props.events, state.currentDate),
+      refArray: EventCalendar.generateRefArray(props.events.length)
     }
   }
 
@@ -160,7 +171,6 @@ export default class EventCalendar extends React.Component {
         events={item.events}
         width={width}
         styles={this.calendarStyle}
-        scrollToFirst={scrollToFirst}
         start={start}
         end={end}
         refreshControl={refreshControl}
@@ -169,6 +179,7 @@ export default class EventCalendar extends React.Component {
         onMomentumScrollEnd={this.onScrollEndHandler}
         onScrollEndDrag={this.onScrollEndHandler}
         ref={this.state.refArray[index]}
+        contentOffset={this.state.currentY}
       />
     );
   }
