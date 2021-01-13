@@ -5,6 +5,8 @@ import {
   TouchableOpacity,
   Image,
   Text,
+  FlatList,
+  StyleSheet,
 } from 'react-native';
 import _ from 'lodash';
 import moment from 'moment';
@@ -14,27 +16,99 @@ import styleConstructor from './style';
 
 import DayView from './DayView';
 import {HEIGHT_PER_MINUTE} from './constants';
+import { nowTop } from './utils';
 
+const DAY_IN_MILISECONDS = 86400000
 export default class EventCalendar extends React.Component {
-  static dateByIndex(index, initDate, size) {
-    return moment.utc(initDate).add(index - size, 'days').format('YYYY-MM-DD');
+
+  static addZero(number) {
+  return number >= 10 ? number : `0${number}`;
+}
+
+  static dateToString(date) {
+  return `${date.getFullYear()}-${addZero(date.getMonth() + 1)}-${addZero(date.getDate())}`
+}
+
+  static newDate(dateString) { return  new Date(`${dateString}T00:00:00`) }
+
+  static indexByDate(events, date) {
+    const firstDate = EventCalendar.newDate(events[0].date)
+    const indexDate = EventCalendar.newDate(date)
+    return (indexDate.getTime() - firstDate.getTime()) / DAY_IN_MILISECONDS
   }
+
+  static dateByIndex(events, index) { return events[index].date }
+
+  static generateRefArray(length) {
+    const refArray = []
+    for (let index = 0; index < length; index++) {
+      refArray.push(React.createRef())
+    }
+    return refArray
+  }
+
+  static currentHourOffset = (start, end) => {
+    const nowHour = new Date().getHours()
+    if ((nowHour < (start + 1)) || (nowHour > (end + 1))) return 0;
+    return nowTop(start) - 100;
+  };
 
   constructor(props) {
     super(props);
     const start = props.start || 0;
     const end = props.end || 24;
+
+    const initialIndex = EventCalendar.indexByDate(props.events, props.initDate);
+  
+    this.state = {
+      currentDate: props.initDate,
+      currentIndex: initialIndex,
+      initialIndex: initialIndex,
+      currentY: EventCalendar.currentHourOffset(start, end),
+      events: props.events,
+      refArray: EventCalendar.generateRefArray(props.events.length)
+    }
+
+
     this.calendarStyle = styleConstructor(props.styles, (end - start) * 60 * HEIGHT_PER_MINUTE);
 
     this.calendarRef = React.createRef();
-    this.getItem = this.getItem.bind(this);
     this.getItemLayout = this.getItemLayout.bind(this);
     this.renderItem = this.renderItem.bind(this);
-    this.scrollEndHandler = this.scrollEndHandler.bind(this);
+    this.onScrollHandler = this.onScrollHandler.bind(this);
+    this.onScrollEndHandler = this.onScrollEndHandler.bind(this);
+    this.syncVerticalPosition = this.syncVerticalPosition.bind(this);
   }
 
-  shouldComponentUpdate() {
-    return false;
+  static getDerivedStateFromProps(props, state) {
+    if (props.events === state.events) return null;
+    return {
+      events: props.events,
+      currentIndex: EventCalendar.indexByDate(props.events, state.currentDate),
+      refArray: EventCalendar.generateRefArray(props.events.length)
+    }
+  }
+
+  syncVerticalPosition(index) {
+    if (index < 0 || index > (this.state.refArray.length -1 )) return;
+    this.state.refArray[index].current.scrollTo({y: this.state.currentY, animated: false})
+  }
+
+  componentDidUpdate(prevProps, prevState) {
+
+    if(prevProps.events !== this.props.events) {
+      this.calendarRef.current.scrollToIndex({animated: false, index: this.state.currentIndex})
+    }
+
+    if(prevState.currentY !== this.state.currentY) {
+      this.syncVerticalPosition(this.state.currentIndex + 1)
+      this.syncVerticalPosition(this.state.currentIndex - 1)
+    }
+
+    if(prevState.currentIndex !== this.state.currentIndex) {
+      this.syncVerticalPosition(this.state.currentIndex + 1)
+      this.syncVerticalPosition(this.state.currentIndex - 1)
+    }
   }
 
   getItem(eventList, index) {
@@ -43,90 +117,104 @@ export default class EventCalendar extends React.Component {
     return item;
   }
 
+  keyExtractor(item) { return item.date } ;
+
   getItemLayout(data, index) {
     const { width } = this.props;
     return { length: width, offset: width * index, index };
   }
 
   goToDate(date) {
-    const { initDate, size } = this.props;
-    const earliestDate = moment.utc(initDate).subtract(size, 'days');
-    const index = moment.utc(date).diff(earliestDate, 'days');
-    this.goToPage(index);
+    this.goToPage(EventCalendar.indexByDate(this.state.events, date));
   }
 
   goToPage(index) {
-    const { size } = this.props;
-    if (index <= 0 || index >= size * 2) return;
+    if (index < 0 || index >= this.state.events.length) return;
     this.calendarRef.current.scrollToIndex({ index, animated: false });
   }
 
-  scrollEndHandler(event) {
-    const {
-      width, initDate, size, onDateChange,
-    } = this.props;
-    const index = Math.round(event.nativeEvent.contentOffset.x / width);
-    const date = EventCalendar.dateByIndex(index, initDate, size);
-    if (onDateChange) onDateChange(date);
+  onScrollHandler(event) {
+    if(event.nativeEvent.contentOffset.x < 0) return;
+    const index = Math.round(event.nativeEvent.contentOffset.x / this.props.width);
+    if(this.state.currentIndex === index) return;
+    const date = EventCalendar.dateByIndex(this.state.events, index)
+    this.setState({
+      currentDate: date,
+      currentIndex: index
+    })
+    this.props.onDateChange(date)
+  }
+
+  onScrollEndHandler(event) {
+    this.setState({currentY: event.nativeEvent.contentOffset.y})
   }
 
   renderItem({ index, item }) {
     const {
-      initDate, size, formatHeader, width,
+      formatHeader, width,
       format24h, headerStyle, renderEvent, onEventTapped, scrollToFirst, start, end,
       refreshControl, startKey, endKey
     } = this.props;
-    const date = EventCalendar.dateByIndex(index, initDate, size);
 
     return (
-      <View style={[this.calendarStyle.container, { width }]}>
-        <DayView
-          date={date}
-          index={index}
-          format24h={format24h}
-          formatHeader={formatHeader}
-          headerStyle={headerStyle}
-          renderEvent={renderEvent}
-          onEventTapped={onEventTapped}
-          events={item}
-          width={width}
-          styles={this.calendarStyle}
-          scrollToFirst={scrollToFirst}
-          start={start}
-          end={end}
-          refreshControl={refreshControl}
-          startKey={startKey}
-          endKey={endKey}
-        />
-      </View>
+      <DayView
+        date={item.date}
+        index={index}
+        format24h={format24h}
+        formatHeader={formatHeader}
+        headerStyle={headerStyle}
+        renderEvent={renderEvent}
+        onEventTapped={onEventTapped}
+        events={item.events}
+        width={width}
+        styles={this.calendarStyle}
+        start={start}
+        end={end}
+        refreshControl={refreshControl}
+        startKey={startKey}
+        endKey={endKey}
+        onMomentumScrollEnd={this.onScrollEndHandler}
+        onScrollEndDrag={this.onScrollEndHandler}
+        ref={this.state.refArray[index]}
+        contentOffset={this.state.currentY}
+      />
     );
   }
 
   render() {
-    const { width, size, events } = this.props;
+    const { width } = this.props;
     return (
       <View style={[this.calendarStyle.container, { width }]}>
-        <VirtualizedList
+        <FlatList
           ref={this.calendarRef}
-          windowSize={3}
-          initialNumToRender={3}
-          initialScrollIndex={size}
-          data={events}
-          getItemCount={() => size * 2}
-          getItem={this.getItem}
-          keyExtractor={(item, index) => index.toString()}
+          windowSize={8}
+          initialNumToRender={1}
+          initialScrollIndex={this.state.initialIndex}
+          data={this.state.events}
+          keyExtractor={this.keyExtractor}
           getItemLayout={this.getItemLayout}
           horizontal
           pagingEnabled
           renderItem={this.renderItem}
           style={{ width }}
-          onScroll={this.scrollEndHandler}
+          onScroll={this.onScrollHandler}
           showsHorizontalScrollIndicator={false}
         />
       </View>
     );
   }
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  itemContainer: {
+    flex: 1,
+    width: '100%',
+    backgroundColor: 'red',
+  }
+})
 
 EventCalendar.defaultProps = {
   end: 24,

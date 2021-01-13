@@ -5,6 +5,7 @@ import moment from 'moment';
 import _ from 'lodash';
 import populateEvents from './Packer';
 import {MINUTES_PER_BLOCK, BLOCK_HEIGHT, HEIGHT_PER_MINUTE} from './constants';
+import { newDate, format24, nowTop } from './utils';
 
 const LEFT_MARGIN = 60 - 1;
 // const RIGHT_MARGIN = 10
@@ -19,12 +20,11 @@ function range(from, to) {
 }
 
 
-const DayView = ({
+const DayView = React.forwardRef(({
   date,
   end,
   events,
   format24h,
-  index,
   onEventTapped,
   renderEvent,
   start,
@@ -32,39 +32,33 @@ const DayView = ({
   width,
   refreshControl,
   startKey,
-  endKey
-}) => {
+  endKey,
+  orderEvents,
+  onMomentumScrollEnd,
+  onScrollEndDrag,
+  contentOffset
+}, scrollRef) => {
   const containerWidth = width - LEFT_MARGIN;
   const blockedEvents = events.filter((e) => e.booking_type === 'blocked');
   const normalEvents = events.filter((e) => e.booking_type !== 'blocked');
-  const packedEvents = populateEvents(normalEvents, containerWidth, start, startKey, endKey);
-  const scrollViewRef = useRef(null);
-
-  const contentOffset = () => {
-    const nowHour = moment().hour();
-    if ((nowHour < (start + 1)) || (nowHour > (end + 1))) return 0;
-    return nowTop() - 100;
-  };
+  const packedEvents = populateEvents(normalEvents, containerWidth, start, startKey, endKey, orderEvents);
 
   useEffect(() => {
     if (Platform.OS === 'ios') return;
     setTimeout(() => {
-      if (!scrollViewRef.current) return;
-      scrollViewRef.current.scrollTo({ y: contentOffset(), animated: false });
+      if (!scrollRef.current) return;
+      scrollRef.current.scrollTo({ y: contentOffset, animated: false });
     }, 0);
   }, []);
 
-  const nowTop = () => {
-    const now = moment();
-    const nowInMinutes = now.hour() * 60 + now.minutes();
-    const startInMinutes = start * 60;
-    return ((nowInMinutes - startInMinutes) / MINUTES_PER_BLOCK) * BLOCK_HEIGHT;
-  };
-
   const renderRedLine = () => {
-    const now = moment();
-    if (!now.isSame(date, 'day')) return null;
-    const top = nowTop();
+    const now = new Date();
+    const dateObject = newDate(date)
+    if ( now.getDate() !== dateObject.getDate()
+         || now.getMonth() !== dateObject.getMonth() 
+         || now.getFullYear() !== dateObject.getFullYear()) { return null };
+
+    const top = nowTop(start);
     const lineWidth = width - 20;
     return (
       <>
@@ -75,12 +69,13 @@ const DayView = ({
   };
 
   const renderLines = () => {
-    const time = moment().hour(start).minute(0);
+    const time = new Date()
+    time.setHours(start, 0, 0)
     const lines = (((end - start) * 60) / MINUTES_PER_BLOCK);
 
     return [...Array(lines).keys()].map((i) => {
-      const timeText = format24h ? time.format('HH:mm') : time.format('HH:mm A');
-      time.add(MINUTES_PER_BLOCK, 'minutes');
+      const timeText = format24(time)
+      time.setTime(time.getTime() + (MINUTES_PER_BLOCK * 60 * 1000 ))
       return (
         <View key={timeText}>
           <Text style={[styles.timeLabel, { top: BLOCK_HEIGHT * i - 6 }]}>
@@ -146,9 +141,7 @@ const DayView = ({
     });
 
     return (
-      <View>
-        <View style={{ marginLeft: LEFT_MARGIN }}>{componentEvents}</View>
-      </View>
+      <View style={{ marginLeft: LEFT_MARGIN }}>{componentEvents}</View>
     );
   };
 
@@ -159,17 +152,21 @@ const DayView = ({
     const lineWidth = 4;
     const lineMargin = 8;
     return blockedEvents.filter((event) => { 
-      return moment(event[endKey]).hour() >= start && moment(event[startKey]).hour() <= end;
+      return new Date(event[endKey]).getHours() >= start && new Date(event[startKey]).getHours() <= end;
     }).map((event) => {
-      const eventStart = moment(event[startKey]);
-      const eventEnd = moment(event[endKey]);
-      const dayStartTime = eventStart.clone().hour(start).minute(0);
+      const eventStart = new Date(event[startKey]);
+      const eventEnd = new Date(event[endKey]);
+      const dayStartTime = new Date(eventStart.getTime())
+      dayStartTime.setHours(start, 0, 0)
 
-      const blockStart = eventStart.hour() < start ? dayStartTime : eventStart;
-      const blockEnd = eventEnd.hour() > end ? eventStart.clone().hour(end).minute(0) : eventEnd;
+      const dayEndtime = new Date(eventStart.getTime())
+      dayEndtime.setHours(end, 0, 0)
 
-      const top = blockStart.diff(dayStartTime, 'minutes', true) * HEIGHT_PER_MINUTE;
-      const height = blockEnd.diff(blockStart, 'minutes', true) * HEIGHT_PER_MINUTE;
+      const blockStart = eventStart.getHours() < start ? dayStartTime : eventStart;
+      const blockEnd = eventEnd.getHours() > end ? dayEndtime : eventEnd;
+
+      const top = (blockStart.getTime() - dayStartTime.getTime()) / (1000 * 60) * HEIGHT_PER_MINUTE
+      const height = (blockEnd.getTime() - blockStart.getTime()) / (1000 * 60) * HEIGHT_PER_MINUTE
 
 
       const rotatedLineWidth = rotatedLenght(lineWidth);
@@ -213,23 +210,29 @@ const DayView = ({
   };
 
   return (
-    <ScrollView
-      contentContainerStyle={[styles.contentStyle, { width }]}
-      showsVerticalScrollIndicator={false}
-      contentOffset={{ y: contentOffset() }}
-      ref={scrollViewRef}
-      refreshControl={refreshControl}
-    >
-      {renderBlocks()}
-      {renderLines()}
-      {renderEvents()}
-      {renderRedLine()}
-    </ScrollView>
+    <View style={{ flex:1, width }}>
+      <ScrollView
+        contentContainerStyle={[styles.contentStyle, { width }]}
+        showsVerticalScrollIndicator={true}
+        contentOffset={{ y: contentOffset }}
+        refreshControl={refreshControl}
+        onMomentumScrollEnd={onMomentumScrollEnd}
+        onScrollEndDrag={onScrollEndDrag}
+        ref={scrollRef}
+      >
+        {renderBlocks()}
+        {renderLines()}
+        {renderEvents()}
+        {renderRedLine()}
+      </ScrollView>
+    </View>
   );
-};
+});
 
-const MemoizedDayView = React.memo(DayView, (prevProps, nextProps) => (
-  JSON.stringify(prevProps.events) === JSON.stringify(nextProps.events)
-));
+const arePropsEqual = (prevProps, nextProps) => {
+  return prevProps.events === nextProps.events; 
+}
+
+const MemoizedDayView = React.memo(DayView, arePropsEqual)
 
 export default MemoizedDayView;
