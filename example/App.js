@@ -1,122 +1,142 @@
-import React from 'react';
-import { Dimensions, View } from 'react-native';
+import React, { useRef, useState } from 'react';
+import { Button, Dimensions, SafeAreaView, Text, TextInput, useWindowDimensions, View } from 'react-native';
 
-import EventCalendar from '@agendapro/react-native-events-calendar';
+import EventCalendar from './src/EventCalendar';
 
 let { width } = Dimensions.get('window');
 
-export default class App extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      events: [
-        {
-          start: '2017-09-06 22:30:00',
-          end: '2017-09-06 23:30:00',
-          title: 'Dr. Mariana Joseph',
-          summary: '3412 Piedmont Rd NE, GA 3032',
-          color: 'green',
-        },
-        {
-          start: '2017-09-07 00:30:00',
-          end: '2017-09-07 01:30:00',
-          title: 'Dr. Mariana Joseph',
-          summary: '3412 Piedmont Rd NE, GA 3032',
-        },
-        {
-          start: '2017-09-07 01:30:00',
-          end: '2017-09-07 02:20:00',
-          title: 'Dr. Mariana Joseph',
-          summary: '3412 Piedmont Rd NE, GA 3032',
-        },
-        {
-          start: '2017-09-07 04:10:00',
-          end: '2017-09-07 04:40:00',
-          title: 'Dr. Mariana Joseph',
-          summary: '3412 Piedmont Rd NE, GA 3032',
-        },
-        {
-          start: '2017-09-07 01:05:00',
-          end: '2017-09-07 01:45:00',
-          title: 'Dr. Mariana Joseph',
-          summary: '3412 Piedmont Rd NE, GA 3032',
-        },
-        {
-          start: '2017-09-07 14:30:00',
-          end: '2017-09-07 16:30:00',
-          title: 'Dr. Mariana Joseph',
-          summary: '3412 Piedmont Rd NE, GA 3032',
-        },
-        {
-          start: '2017-09-08 01:20:00',
-          end: '2017-09-08 02:20:00',
-          title: 'Dr. Mariana Joseph',
-          summary: '3412 Piedmont Rd NE, GA 3032',
-        },
-        {
-          start: '2017-09-08 04:10:00',
-          end: '2017-09-08 04:40:00',
-          title: 'Dr. Mariana Joseph',
-          summary: '3412 Piedmont Rd NE, GA 3032',
-        },
-        {
-          start: '2017-09-08 00:45:00',
-          end: '2017-09-08 01:45:00',
-          title: 'Dr. Mariana Joseph',
-          summary: '3412 Piedmont Rd NE, GA 3032',
-        },
-        {
-          start: '2017-09-08 11:30:00',
-          end: '2017-09-08 12:30:00',
-          title: 'Dr. Mariana Joseph',
-          summary: '3412 Piedmont Rd NE, GA 3032',
-        },
-        {
-          start: '2017-09-09 01:30:00',
-          end: '2017-09-09 02:00:00',
-          title: 'Dr. Mariana Joseph',
-          summary: '3412 Piedmont Rd NE, GA 3032',
-        },
-        {
-          start: '2017-09-09 03:10:00',
-          end: '2017-09-09 03:40:00',
-          title: 'Dr. Mariana Joseph',
-          summary: '3412 Piedmont Rd NE, GA 3032',
-        },
-        {
-          start: '2017-09-09 00:10:00',
-          end: '2017-09-09 01:45:00',
-          title: 'Dr. Mariana Joseph',
-          summary: '3412 Piedmont Rd NE, GA 3032',
-        },
-        {
-          start: '2017-09-10 12:10:00',
-          end: '2017-09-10 13:45:00',
-          title: 'Dr. Mariana Joseph',
-          summary: '3412 Piedmont Rd NE, GA 3032',
-        },
-      ],
-    };
+function addZero(number) {
+  return number >= 10 ? number : `0${number}`;
+}
+
+function generateDate(date, hour, min) {
+  return `${date.getFullYear()}-${addZero(date.getMonth() + 1)}-${addZero(date.getDate())}T${addZero(hour)}:${addZero(min)}:00`;
+}
+
+function generateDateKey(date) {
+  return `${date.getFullYear()}-${addZero(date.getMonth() + 1)}-${addZero(date.getDate())}`
+}
+
+
+function generateEvents(days) {
+  const events = [];
+  const currentDate = new Date('2021-01-11T00:00:00');
+  for (let day = 0; day < days; day++) {
+    events.push({
+      events: generateEventsByDate(currentDate),
+      date: generateDateKey(currentDate)
+    })
+    currentDate.setTime(currentDate.getTime() + (24*60*60*1000))
   }
 
-  _eventTapped(event) {
-    alert(JSON.stringify(event));
+  return events;
+}
+
+function generateEventsHash(days) {
+  const events = {};
+  const currentDate = new Date('2021-01-11T00:00:00');
+  for (let day = 0; day < days; day++) {
+    events[generateDateKey(currentDate)] = generateEventsByDate(currentDate)
+    currentDate.setTime(currentDate.getTime() + (24*60*60*1000))
   }
 
-  render() {
+  return events;
+}
+
+const generateEventsByDate = (date) => {
+
+  const dayEvents = []
+  for (let hour = 0; hour < 22; hour++) {
+      
+    dayEvents.push({
+      start: generateDate(date, hour, 0),
+      end: generateDate(date, hour +1, 0),
+    })
+
+    dayEvents.push({
+      start: generateDate(date, hour, 0),
+      end: generateDate(date, hour, 30),
+    })
+
+    dayEvents.push({
+      start: generateDate(date, hour, 30),
+      end: generateDate(date, hour + 1, 0),
+    })
+     
+  }
+
+  return dayEvents;
+}
+
+const App = () =>  {
+ 
+  const [events, setEvents] = useState(generateEvents(10))
+  const [date, setDate] = useState('2021-01-11')
+  const [goToDate, setGoToDate] = useState('')
+
+  const calendarRef = useRef(null)
+
+  const window = useWindowDimensions()
+
+
+  const renderEvent = (event) => {
     return (
-      <View style={{ flex: 1, marginTop: 20 }}>
-        <EventCalendar
-          eventTapped={this._eventTapped.bind(this)}
-          events={this.state.events}
-          width={width}
-          initDate={'2017-09-07'}
-          scrollToFirst
-          upperCaseHeader
-          uppercase
-          scrollToFirst={false}
-        />
+      <View>
+        <Text>{event.start}</Text>
       </View>
     );
   }
+
+  const addEventStart = () => {
+    const addDate = new Date(`${goToDate}T00:00:00`)
+    const event = {
+      events: generateEventsByDate(addDate),
+      date: generateDateKey(addDate)
+    }
+    const newEvents = events.slice()
+    newEvents.unshift(event)
+    setEvents(newEvents)
+  }
+
+  // const onDateChange = (date) => {
+  //   this.setState({date})
+  // };
+
+  // onChangeText(date) {
+  //   this.setState({goToDate: date})
+  // }
+
+  const onPressHandler = () => {
+    calendarRef.current.goToDate(goToDate);
+  }
+
+  const onEventTapped = () => {};
+
+  return (
+    <SafeAreaView style={{flex: 1}}>
+      <Text style={{textAlign: 'center'}}>{date}</Text>
+      <View style={{}}>
+        <TextInput value={goToDate} onChangeText={setGoToDate}/>
+        <Button title="Ir" onPress={onPressHandler} />
+        <Button title="Add" onPress={addEventStart} />
+      </View>
+      <EventCalendar
+        events={events}
+        width={window.width}
+        onEventTapped={onEventTapped}
+        renderEvent={renderEvent}
+        onDateChange={setDate}
+        startKey="start"
+        endKey="end"
+        orderEvents={false}
+        initDate={date}
+        ref={calendarRef}
+
+      />
+    </SafeAreaView>
+  );
 }
+
+export default App;
+
+

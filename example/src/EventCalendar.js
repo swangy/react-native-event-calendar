@@ -20,6 +20,9 @@ import { nowTop } from './utils';
 
 const DAY_IN_MILISECONDS = 86400000
 export default class EventCalendar extends React.Component {
+  // static dateByIndex(index, initDate, size) {
+  //   return moment.utc(initDate).add(index - size, 'days').format('YYYY-MM-DD');
+  // }
 
   static addZero(number) {
   return number >= 10 ? number : `0${number}`;
