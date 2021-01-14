@@ -59,7 +59,7 @@ export default class EventCalendar extends React.Component {
     const end = props.end || 24;
 
     const initialIndex = EventCalendar.indexByDate(props.events, props.initDate);
-  
+
     this.state = {
       currentDate: props.initDate,
       currentIndex: initialIndex,
@@ -91,6 +91,7 @@ export default class EventCalendar extends React.Component {
 
   syncVerticalPosition(index) {
     if (index < 0 || index > (this.state.refArray.length -1 )) return;
+    if(this.state.refArray[index].current === null) return
     this.state.refArray[index].current.scrollTo({y: this.state.currentY, animated: false})
   }
 
@@ -177,6 +178,7 @@ export default class EventCalendar extends React.Component {
         onScrollEndDrag={this.onScrollEndHandler}
         ref={this.state.refArray[index]}
         contentOffset={this.state.currentY}
+        ref={this.state.refArray[index]}
       />
     );
   }
