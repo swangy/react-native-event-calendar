@@ -36,7 +36,8 @@ const DayView = React.forwardRef(({
   orderEvents,
   onMomentumScrollEnd,
   onScrollEndDrag,
-  contentOffset
+  contentOffset,
+  
 }, scrollRef) => {
   const containerWidth = width - LEFT_MARGIN;
   const blockedEvents = events.filter((e) => e.booking_type === 'blocked');
@@ -230,7 +231,7 @@ const DayView = React.forwardRef(({
 });
 
 const arePropsEqual = (prevProps, nextProps) => {
-  return prevProps.events === nextProps.events; 
+  return prevProps.events === nextProps.events
 }
 
 const MemoizedDayView = React.memo(DayView, arePropsEqual)
