@@ -37,7 +37,6 @@ const DayView = React.forwardRef(({
   onMomentumScrollEnd,
   onScrollEndDrag,
   contentOffset,
-  
 }, scrollRef) => {
   const containerWidth = width - LEFT_MARGIN;
   const blockedEvents = events.filter((e) => e.booking_type === 'blocked');
