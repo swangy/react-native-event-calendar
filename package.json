@@ -1,6 +1,6 @@
 {
   "name": "@agendapro/react-native-events-calendar",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "show calendar events by date",
   "main": "./src/EventCalendar.js",
   "scripts": {
