@@ -177,20 +177,25 @@ const DayView = React.forwardRef(({
 
       const linesQuantity = Math.floor(((blockWidth) / (rotatedLineWidth + rotatedLineMargin)) * 2.1);
 
-      const lines = [...Array(linesQuantity)].map((i) => (
-        <View
-          key={i}
-          style={[
-            styles.blockedLine,
-            {
-              width: lineWidth,
-              marginRight: lineMargin,
-              height: rotatedHeight,
-              left: height * -1,
-            },
-          ]}
-        />
-      ));
+      let lines = [];
+
+      for (let index = 1; index <= linesQuantity; index++) {
+        lines.push(
+          <View
+            key={index}
+            style={[
+              styles.blockedLine,
+              {
+                width: lineWidth,
+                marginRight: lineMargin,
+                height: rotatedHeight,
+                left: height * -1,
+              },
+            ]}
+          />
+        )
+      }
+
       return (
         <View
           style={[

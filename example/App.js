@@ -45,22 +45,32 @@ function generateEventsHash(days) {
 
 const generateEventsByDate = (date) => {
 
+  let id = 1;
+
   const dayEvents = []
   for (let hour = 0; hour < 22; hour++) {
       
     dayEvents.push({
       start: generateDate(date, hour, 0),
       end: generateDate(date, hour +1, 0),
+      booking_type: 'blocked',
+      id
     })
+    
+    id+=1
 
     dayEvents.push({
       start: generateDate(date, hour, 0),
       end: generateDate(date, hour, 30),
+      id
     })
+
+    id+=1
 
     dayEvents.push({
       start: generateDate(date, hour, 30),
       end: generateDate(date, hour + 1, 0),
+      id
     })
      
   }
