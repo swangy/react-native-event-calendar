@@ -176,7 +176,7 @@ export default class EventCalendar extends React.Component {
         endKey={endKey}
         onMomentumScrollEnd={this.onScrollEndHandler}
         onScrollEndDrag={this.onScrollEndHandler}
-        scrollRef={this.state.refArray[index]}
+        ref={this.state.refArray[index]}
         contentOffset={this.state.currentY}
       />
     );

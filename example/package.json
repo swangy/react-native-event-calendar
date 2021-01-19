@@ -10,8 +10,6 @@
     "lint": "eslint ."
   },
   "dependencies": {
-    "fsevents": "^2.1.2",
-    "g": "^2.0.1",
     "lodash": "^4.17.15",
     "moment": "^2.24.0",
     "npm": "^6.14.2",

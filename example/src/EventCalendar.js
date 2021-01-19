@@ -20,9 +20,6 @@ import { nowTop } from './utils';
 
 const DAY_IN_MILISECONDS = 86400000
 export default class EventCalendar extends React.Component {
-  // static dateByIndex(index, initDate, size) {
-  //   return moment.utc(initDate).add(index - size, 'days').format('YYYY-MM-DD');
-  // }
 
   static addZero(number) {
   return number >= 10 ? number : `0${number}`;
@@ -62,7 +59,7 @@ export default class EventCalendar extends React.Component {
     const end = props.end || 24;
 
     const initialIndex = EventCalendar.indexByDate(props.events, props.initDate);
-  
+
     this.state = {
       currentDate: props.initDate,
       currentIndex: initialIndex,
@@ -94,6 +91,7 @@ export default class EventCalendar extends React.Component {
 
   syncVerticalPosition(index) {
     if (index < 0 || index > (this.state.refArray.length -1 )) return;
+    if(this.state.refArray[index].current === null) return
     this.state.refArray[index].current.scrollTo({y: this.state.currentY, animated: false})
   }
 

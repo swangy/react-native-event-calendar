@@ -37,7 +37,7 @@ const DayView = React.forwardRef(({
   onMomentumScrollEnd,
   onScrollEndDrag,
   contentOffset,
-}, scrollRef) => {
+}, ref) => {
   const containerWidth = width - LEFT_MARGIN;
   const blockedEvents = events.filter((e) => e.booking_type === 'blocked');
   const normalEvents = events.filter((e) => e.booking_type !== 'blocked');
@@ -46,8 +46,8 @@ const DayView = React.forwardRef(({
   useEffect(() => {
     if (Platform.OS === 'ios') return;
     setTimeout(() => {
-      if (!scrollRef.current) return;
-      scrollRef.current.scrollTo({ y: contentOffset, animated: false });
+      if (!ref.current) return;
+      ref.current.scrollTo({ y: contentOffset, animated: false });
     }, 0);
   }, []);
 
@@ -218,7 +218,7 @@ const DayView = React.forwardRef(({
         refreshControl={refreshControl}
         onMomentumScrollEnd={onMomentumScrollEnd}
         onScrollEndDrag={onScrollEndDrag}
-        ref={scrollRef}
+        ref={ref}
       >
         {renderBlocks()}
         {renderLines()}
