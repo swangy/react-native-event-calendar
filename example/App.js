@@ -1,5 +1,6 @@
 import React, { useRef, useState } from 'react';
 import { Button, Dimensions, SafeAreaView, Text, TextInput, useWindowDimensions, View } from 'react-native';
+import AgendaView from './src/AgendaView';
 
 import EventCalendar from './src/EventCalendar';
 
@@ -130,7 +131,7 @@ const App = () =>  {
         <Button title="Ir" onPress={onPressHandler} />
         <Button title="Add" onPress={addEventStart} />
       </View>
-      <EventCalendar
+      {/* <EventCalendar
         events={events}
         width={window.width}
         onEventTapped={onEventTapped}
@@ -142,6 +143,11 @@ const App = () =>  {
         initDate={date}
         ref={calendarRef}
 
+      /> */}
+      <AgendaView
+        events={events}
+        renderItem={renderEvent}
+        
       />
     </SafeAreaView>
   );
