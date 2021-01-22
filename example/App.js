@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import { Button, Dimensions, SafeAreaView, Text, TextInput, useWindowDimensions, View } from 'react-native';
+import { Button, Dimensions, SafeAreaView, Text, TextInput, useWindowDimensions, View, StyleSheet } from 'react-native';
 import AgendaView from './src/AgendaView';
 
 import EventCalendar from './src/EventCalendar';
@@ -18,13 +18,17 @@ function generateDateKey(date) {
   return `${date.getFullYear()}-${addZero(date.getMonth() + 1)}-${addZero(date.getDate())}`
 }
 
+const generateTime = (date) => (
+  `${addZero(date.getHours(date))}:${addZero(date.getMinutes())}`
+)
+
 
 function generateEvents(days) {
   const events = [];
   const currentDate = new Date('2021-01-11T00:00:00');
   for (let day = 0; day < days; day++) {
     events.push({
-      events: generateEventsByDate(currentDate),
+      data: generateEventsByDate(currentDate),
       date: generateDateKey(currentDate)
     })
     currentDate.setTime(currentDate.getTime() + (24*60*60*1000))
@@ -49,7 +53,7 @@ const generateEventsByDate = (date) => {
   let id = 1;
 
   const dayEvents = []
-  for (let hour = 0; hour < 22; hour++) {
+  for (let hour = 0; hour < 2; hour++) {
       
     dayEvents.push({
       start: generateDate(date, hour, 0),
@@ -73,6 +77,8 @@ const generateEventsByDate = (date) => {
       end: generateDate(date, hour + 1, 0),
       id
     })
+
+    id+=1
      
   }
 
@@ -81,7 +87,7 @@ const generateEventsByDate = (date) => {
 
 const App = () =>  {
  
-  const [events, setEvents] = useState(generateEvents(10))
+  const [events, setEvents] = useState(generateEvents(5))
   const [date, setDate] = useState('2021-01-11')
   const [goToDate, setGoToDate] = useState('')
 
@@ -89,11 +95,16 @@ const App = () =>  {
 
   const window = useWindowDimensions()
 
-
   const renderEvent = (event) => {
+
+    const startDate = new Date(event.start)
+    const endDate = new Date(event.end)
+
     return (
-      <View>
-        <Text>{event.start}</Text>
+      <View style={styles.event}>
+        <Text style={styles.eventText}>Rodrigo Monsalve</Text>
+        <Text style={styles.eventText}>{`${generateTime(startDate)}-${generateTime(endDate)}`}</Text>
+        <Text style={styles.eventText}>Rodrigo Monsalve</Text>
       </View>
     );
   }
@@ -146,12 +157,23 @@ const App = () =>  {
       /> */}
       <AgendaView
         events={events}
-        renderItem={renderEvent}
-        
+        renderEvent={renderEvent}
+        width={width}
+        render
       />
     </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+  event: {
+    paddingVertical: 4,
+    paddingHorizontal: 8,
+  },
+  eventText: {
+    color: 'white',
+  }
+});
 
 export default App;
 

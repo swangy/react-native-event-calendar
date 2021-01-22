@@ -28,19 +28,17 @@ export default MemoizedEvent;
 
 const styles = StyleSheet.create({
   event: {
-    position: 'absolute',
-    backgroundColor: '#F0F4FF',
+    // position: 'absolute',
+    backgroundColor: '#4287f5',
     opacity: 0.8,
-    borderColor: '#DDE5FD',
-    borderWidth: 1,
-    borderRadius: 5,
-    paddingLeft: 4,
-    minHeight: 25,
+    borderColor: '#4287f5',
+    borderWidth: 0.5,
+    borderRadius: 8,
     flex: 1,
-    paddingTop: 5,
-    paddingBottom: 0,
     flexDirection: 'column',
     alignItems: 'flex-start',
-    overflow: 'hidden',
+    marginTop: 8,
+    marginHorizontal: 16,
+    // overflow: 'hidden',
   },
 });

@@ -9,49 +9,54 @@ class AgendaView extends Component {
     };
 
     this.renderEvent = this.renderEvent.bind(this);
-
-
   }
 
   renderEvent({item}) {
-
-    const style = {
-      height: 150,
-      width: '100%',
-      backgroundColor: item.color,
-      boderColor: item.boderColor,
-    }
 
     return (
       <Event
         event={item}
         onPress={this.props.onEventPress}
-        style={style}
         renderEvent={this.props.renderEvent}
       />
     )
   }
 
+  renderSectionHeader({section}) {
+    return (
+      <View style={{backgroundColor: 'white'}}>
+        <Text>{section.date}</Text>
+      </View>
+    )
+  }
+
   keyExtractor(item) {
-    return item.id.toString()
+    console.log("key extractor", item.id)
+    return item.id
   }
 
   renderEmptyComponent() {
     return (
-      <Text>vacia :c</Text>
+      <View style={{backgroundColor: 'white'}}>
+        <Text>vacia :c</Text>
+      </View>
     )
   }
 
   render() {
 
     return (
-      <SectionList
-        sections={this.props.events}
-        renderItem={this.renderEvent}
-        keyExtractor={keyExtractor}
-        // ItemSeparatorComponent={itemSeparatorComponent}
-        ListEmptyComponent={renderEmptyComponent}
-      />
+      <View style={{ flex:1, width: this.props.width }}>
+        <SectionList
+          sections={this.props.events}
+          renderItem={this.renderEvent}
+          keyExtractor={this.keyExtractor}
+          // ItemSeparatorComponent={itemSeparatorComponent}
+          ListEmptyComponent={this.renderEmptyComponent}
+          renderSectionHeader={this.renderSectionHeader}
+          stickySectionHeadersEnabled
+        />
+      </View>
     );
   }
 }

@@ -238,6 +238,8 @@ const arePropsEqual = (prevProps, nextProps) => {
   return prevProps.events === nextProps.events
 }
 
-const MemoizedDayView = React.memo(DayView, arePropsEqual)
+export default DayView;
 
-export default MemoizedDayView;
+// const MemoizedDayView = React.memo(DayView, arePropsEqual)
+
+// export default MemoizedDayView;
