@@ -6,6 +6,7 @@ import _ from 'lodash';
 import populateEvents from './Packer';
 import {MINUTES_PER_BLOCK, BLOCK_HEIGHT, HEIGHT_PER_MINUTE} from './constants';
 import { newDate, format24, nowTop } from './utils';
+import Event from './Event';
 
 const LEFT_MARGIN = 60 - 1;
 // const RIGHT_MARGIN = 10
@@ -108,36 +109,19 @@ const DayView = React.forwardRef(({
       // However it would make sense to overflow the title to a new line if needed
       const numberOfLines = Math.floor(event.height / TEXT_LINE_HEIGHT);
       const formatTime = format24h ? 'HH:mm' : 'hh:mm A';
+
+      const renderThisEvent = () => renderEvent(event);
+
       return (
-        <TouchableOpacity
-          activeOpacity={0.5}
-          onPress={() => eventTappedHandler(event)}
-          key={event.id}
+        <Event
+          event={event}
+          onPress={eventTappedHandler}
+          renderEvent={renderThisEvent}
           style={[styles.event, style, event.color && eventColor]}
-        >
-          { renderEvent(event) || (
-            <View>
-              <Text numberOfLines={1} style={styles.eventTitle}>
-                {event.title || 'Event'}
-              </Text>
-              {numberOfLines > 1 ? (
-                <Text
-                  numberOfLines={numberOfLines - 1}
-                  style={[styles.eventSummary]}
-                >
-                  {event.summary || ' '}
-                </Text>
-              ) : null}
-              {numberOfLines > 2 ? (
-                <Text style={styles.eventTimes} numberOfLines={1}>
-                  {moment(event[startKey]).format(formatTime)} - {' '}
-                  {moment(event[endKey]).format(formatTime)}
-                </Text>
-              ) : null}
-            </View>
-          )}
-        </TouchableOpacity>
-      );
+          calendar
+          key={event.id}
+        />
+      )
     });
 
     return (
@@ -238,8 +222,8 @@ const arePropsEqual = (prevProps, nextProps) => {
   return prevProps.events === nextProps.events
 }
 
-export default DayView;
+// export default DayView;
 
-// const MemoizedDayView = React.memo(DayView, arePropsEqual)
+const MemoizedDayView = React.memo(DayView, arePropsEqual)
 
-// export default MemoizedDayView;
+export default MemoizedDayView;

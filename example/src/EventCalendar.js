@@ -169,7 +169,7 @@ export default class EventCalendar extends React.Component {
         headerStyle={headerStyle}
         renderEvent={renderEvent}
         onEventTapped={onEventTapped}
-        events={item.events}
+        events={item.data}
         width={width}
         styles={this.calendarStyle}
         start={start}
@@ -185,7 +185,7 @@ export default class EventCalendar extends React.Component {
     );
   }
 
-  renderDaily() {
+  render() {
     const { width } = this.props;
     return (
       <View style={[this.calendarStyle.container, { width }]}>
@@ -206,21 +206,6 @@ export default class EventCalendar extends React.Component {
         />
       </View>
     );
-  }
-
-  renderAgenda() {
-    const { width } = this.props
-  }
-
-  render() {
-    const { mode } = this.props;
-
-    switch (mode) {
-      case DAILY_MODE:
-        return this.renderDaily()
-      case AGENDA_MODE:
-        return this.renderAgenda()
-    }
   }
 }
 
