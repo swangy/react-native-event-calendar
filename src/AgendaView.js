@@ -29,15 +29,6 @@ class AgendaView extends Component {
     )
   }
 
-  renderSectionHeader({section}) {
-    return (
-      <View style={{backgroundColor: 'white'}}>
-        <Text>{section.date}</Text>
-      </View>
-    )
-  }
-
-
   // componentDidMount() {
   //   const wait = new Promise((resolve) => setTimeout(resolve, 0));
   //   wait.then( () => {
@@ -88,10 +79,8 @@ class AgendaView extends Component {
           sections={this.props.events}
           renderItem={this.renderEvent}
           keyExtractor={this.keyExtractor}
-          // getItemLayout={this.getItemLayout}
-          // ItemSeparatorComponent={itemSeparatorComponent}
-          ListEmptyComponent={this.renderEmptyComponent}
-          renderSectionHeader={this.renderSectionHeader}
+          ItemSeparatorComponent={this.props.itemSeparatorComponent}
+          renderSectionHeader={this.props.renderSectionHeader}
           stickySectionHeadersEnabled
           ref={this.scrollViewRef}
           onViewableItemsChanged={this.onViewableItemsChanged}
