@@ -19,6 +19,9 @@ import {HEIGHT_PER_MINUTE} from './constants';
 import { nowTop } from './utils';
 
 const DAY_IN_MILISECONDS = 86400000
+
+const DAILY_MODE = 'daily';
+const AGENDA_MODE = 'agenda';
 export default class EventCalendar extends React.Component {
 
   static addZero(number) {
@@ -182,7 +185,7 @@ export default class EventCalendar extends React.Component {
     );
   }
 
-  render() {
+  renderDaily() {
     const { width } = this.props;
     return (
       <View style={[this.calendarStyle.container, { width }]}>
@@ -203,6 +206,21 @@ export default class EventCalendar extends React.Component {
         />
       </View>
     );
+  }
+
+  renderAgenda() {
+    const { width } = this.props
+  }
+
+  render() {
+    const { mode } = this.props;
+
+    switch (mode) {
+      case DAILY_MODE:
+        return this.renderDaily()
+      case AGENDA_MODE:
+        return this.renderAgenda()
+    }
   }
 }
 

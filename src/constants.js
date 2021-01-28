@@ -1,3 +1,5 @@
 export const BLOCK_HEIGHT = 100;
 export const MINUTES_PER_BLOCK = 30;
 export const HEIGHT_PER_MINUTE = BLOCK_HEIGHT / MINUTES_PER_BLOCK;
+
+export const DAY_IN_MILISECONDS = 86400000

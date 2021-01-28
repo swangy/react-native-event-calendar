@@ -4,8 +4,6 @@ import AgendaView from './src/AgendaView';
 
 import EventCalendar from './src/EventCalendar';
 
-let { width } = Dimensions.get('window');
-
 function addZero(number) {
   return number >= 10 ? number : `0${number}`;
 }
@@ -91,9 +89,10 @@ const App = () =>  {
   const [date, setDate] = useState('2021-01-11')
   const [goToDate, setGoToDate] = useState('')
 
-  const calendarRef = useRef(null)
+  const calendarRef = useRef(null);
+  const agendaRef = useRef(null);
 
-  const window = useWindowDimensions()
+  const width = Dimensions.get('window').width;
 
   const renderEvent = (event) => {
 
@@ -132,15 +131,25 @@ const App = () =>  {
     calendarRef.current.goToDate(goToDate);
   }
 
-  const onEventTapped = () => {};
+  const onEventTapped = (event) => {console.log("omg omg ogm")};
+
+  const moveEvent = () => {
+    agendaRef.current.moveScrollView();
+  }
+
+  const onDateChange = (newDate) => {
+    setDate(newDate)
+  }
+  
 
   return (
     <SafeAreaView style={{flex: 1}}>
       <Text style={{textAlign: 'center'}}>{date}</Text>
       <View style={{}}>
         <TextInput value={goToDate} onChangeText={setGoToDate}/>
-        <Button title="Ir" onPress={onPressHandler} />
+        <Button style={{backgroundColor: 'green', heigth: 200}} title="Ir omg is this real " onPress={onPressHandler} />
         <Button title="Add" onPress={addEventStart} />
+        <Button title="Move event" onPress={moveEvent} />
       </View>
       {/* <EventCalendar
         events={events}
@@ -160,6 +169,10 @@ const App = () =>  {
         renderEvent={renderEvent}
         width={width}
         render
+        onEventPress={onEventTapped}
+        // initDate={date}
+        ref={agendaRef}
+        onDateChange={onDateChange}
       />
     </SafeAreaView>
   );
