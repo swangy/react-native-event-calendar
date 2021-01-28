@@ -5,7 +5,8 @@ const Event = ({
     onPress,
     event,
     style,
-    renderEvent
+    renderEvent,
+    calendar
 }) => {
 
   const onPresshandler = () => onPress(event)
@@ -15,7 +16,7 @@ const Event = ({
       activeOpacity={0.5}
       onPress={onPresshandler}
       key={event.id}
-      style={[styles.event, style ]}
+      style={[styles.event, calendar && styles.calendar, style ]}
     >
       {renderEvent(event)}
     </TouchableOpacity>
@@ -28,7 +29,6 @@ export default MemoizedEvent;
 
 const styles = StyleSheet.create({
   event: {
-    // position: 'absolute',
     backgroundColor: '#4287f5',
     opacity: 0.8,
     borderColor: '#4287f5',
@@ -39,6 +39,12 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
     marginTop: 8,
     marginHorizontal: 16,
-    // overflow: 'hidden',
   },
+  calendar: {
+    position: 'absolute',
+    overflow: 'hidden',
+    marginVertical: 0,
+    marginHorizontal: 0
+  },
+  
 });

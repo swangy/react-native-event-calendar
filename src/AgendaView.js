@@ -92,4 +92,4 @@ class AgendaView extends Component {
 
 const AgendaViewWithDateIndex = withDateIndex(AgendaView)
 
-export default AgendaViewWithDateIndex
+export default AgendaViewWithDateIndex;
