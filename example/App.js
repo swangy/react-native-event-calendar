@@ -3,6 +3,7 @@ import { Button, Dimensions, SafeAreaView, Text, TextInput, useWindowDimensions,
 import AgendaView from './src/AgendaView';
 
 import EventCalendar from './src/EventCalendar';
+import { newDate } from './src/utils';
 
 function addZero(number) {
   return number >= 10 ? number : `0${number}`;
@@ -109,7 +110,7 @@ const App = () =>  {
   }
 
   const addEventStart = () => {
-    const addDate = new Date(`${goToDate}T00:00:00`)
+    const addDate = newDate(goToDate);
     const event = {
       data: generateEventsByDate(addDate),
       date: generateDateKey(addDate)
@@ -139,6 +140,14 @@ const App = () =>  {
 
   const onDateChange = (newDate) => {
     setDate(newDate)
+  }
+
+  const renderSectionHeader = ({section}) => {
+    return (
+      <View style={{backgroundColor: 'white'}}>
+        <Text>{section.date}</Text>
+      </View>
+    )
   }
   
 
@@ -170,7 +179,7 @@ const App = () =>  {
         width={width}
         render
         onEventPress={onEventTapped}
-        // initDate={date}
+        renderSectionHeader={renderSectionHeader}
         ref={agendaRef}
         onDateChange={onDateChange}
       />
