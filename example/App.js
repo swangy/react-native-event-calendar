@@ -1,8 +1,7 @@
 import React, { useRef, useState } from 'react';
 import { Button, Dimensions, SafeAreaView, Text, TextInput, useWindowDimensions, View, StyleSheet } from 'react-native';
-import AgendaView from './src/AgendaView';
+import { EventCalendar, AgendaView } from './src';
 
-import EventCalendar from './src/EventCalendar';
 import { newDate } from './src/utils';
 
 function addZero(number) {
@@ -89,6 +88,7 @@ const App = () =>  {
   const [events, setEvents] = useState(generateEvents(5))
   const [date, setDate] = useState('2021-01-11')
   const [goToDate, setGoToDate] = useState('')
+  const [mode, setMode] = useState('agenda');
 
   const calendarRef = useRef(null);
   const agendaRef = useRef(null);
@@ -102,6 +102,20 @@ const App = () =>  {
 
     return (
       <View style={styles.event}>
+        <Text style={styles.eventText}>Rodrigo Monsalve</Text>
+        <Text style={styles.eventText}>{`${generateTime(startDate)}-${generateTime(endDate)}`}</Text>
+        <Text style={styles.eventText}>Rodrigo Monsalve</Text>
+      </View>
+    );
+  }
+
+  const renderEventDay = (event) => {
+
+    const startDate = new Date(event.start)
+    const endDate = new Date(event.end)
+
+    return (
+      <View>
         <Text style={styles.eventText}>Rodrigo Monsalve</Text>
         <Text style={styles.eventText}>{`${generateTime(startDate)}-${generateTime(endDate)}`}</Text>
         <Text style={styles.eventText}>Rodrigo Monsalve</Text>
@@ -142,6 +156,11 @@ const App = () =>  {
     setDate(newDate)
   }
 
+  const toggleMode = () => {
+    mode === 'agenda' ? setMode('day') : setMode('agenda')
+  }
+  
+
   const renderSectionHeader = ({section}) => {
     return (
       <View style={{backgroundColor: 'white'}}>
@@ -159,30 +178,39 @@ const App = () =>  {
         <Button style={{backgroundColor: 'green', heigth: 200}} title="Ir omg is this real " onPress={onPressHandler} />
         <Button title="Add" onPress={addEventStart} />
         <Button title="Move event" onPress={moveEvent} />
+        <Button title="Change Mode" onPress={toggleMode} />
       </View>
-      {/* <EventCalendar
-        events={events}
-        width={window.width}
-        onEventTapped={onEventTapped}
-        renderEvent={renderEvent}
-        onDateChange={setDate}
-        startKey="start"
-        endKey="end"
-        orderEvents={false}
-        initDate={date}
-        ref={calendarRef}
 
-      /> */}
-      <AgendaView
-        events={events}
-        renderEvent={renderEvent}
-        width={width}
-        render
-        onEventPress={onEventTapped}
-        renderSectionHeader={renderSectionHeader}
-        ref={agendaRef}
-        onDateChange={onDateChange}
-      />
+      { 
+        mode === 'day'
+        ? (
+          <EventCalendar
+            events={events}
+            width={width}
+            onEventTapped={onEventTapped}
+            renderEvent={renderEventDay}
+            onDateChange={setDate}
+            startKey="start"
+            endKey="end"
+            orderEvents={false}
+            initDate={date}
+            ref={calendarRef}
+          />
+          ) : (
+            <AgendaView
+              events={events}
+              renderEvent={renderEvent}
+              width={width}
+              render
+              onEventPress={onEventTapped}
+              renderSectionHeader={renderSectionHeader}
+              ref={agendaRef}
+              onDateChange={onDateChange}
+            />
+          )
+      }
+      
+      
     </SafeAreaView>
   );
 }
