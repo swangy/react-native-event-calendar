@@ -111,7 +111,7 @@ const App = () =>  {
   const addEventStart = () => {
     const addDate = new Date(`${goToDate}T00:00:00`)
     const event = {
-      events: generateEventsByDate(addDate),
+      data: generateEventsByDate(addDate),
       date: generateDateKey(addDate)
     }
     const newEvents = events.slice()

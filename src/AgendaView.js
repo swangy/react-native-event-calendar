@@ -50,13 +50,13 @@ class AgendaView extends Component {
   //   });
   // }
 
-  moveScrollView() {
+  scrollToIndex(index) {
     this.scrollViewRef.current.scrollToLocation({
-      sectionIndex: 1,
+      sectionIndex: index,
       itemIndex: 0,
       animated: false,
       viewPosition: 0,
-    })
+    });
   }
 
   keyExtractor(item) {

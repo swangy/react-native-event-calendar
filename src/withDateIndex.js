@@ -8,6 +8,8 @@ export default (WrappedComponent) => (
     constructor(props) {
       super(props);
 
+      this.wrappedRef = React.createRef();
+
       const initialIndex = indexByDate(props.events, props.initDate)
       const currentIndex = initialIndex >= 0 ? initialIndex : 0;
       const currentDate = dateByIndex(props.events, currentIndex);
@@ -37,7 +39,7 @@ export default (WrappedComponent) => (
 
     componentDidUpdate(prevProps, prevState) {
       if (prevProps.events !== this.props.events) {
-        this.props.forwardedRef.current.scrollToIndex({animated: false, index: this.state.currentIndex})
+        this.wrappedRef.current.scrollToIndex(this.state.currentIndex)
       }
     }
 
@@ -48,6 +50,7 @@ export default (WrappedComponent) => (
           initialIndex={this.state.initialIndex}
           onDateChange={this.onDateChange}
           currentDate={this.state.currentDate}
+          ref={this.wrappedRef}
         />
       )
     }
