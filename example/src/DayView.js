@@ -6,7 +6,7 @@ import _ from 'lodash';
 import populateEvents from './Packer';
 import {MINUTES_PER_BLOCK, BLOCK_HEIGHT, HEIGHT_PER_MINUTE} from './constants';
 import { newDate, format24, nowTop } from './utils';
-import Event from './Event';
+import Event from './AgendaEvent';
 
 const LEFT_MARGIN = 60 - 1;
 // const RIGHT_MARGIN = 10

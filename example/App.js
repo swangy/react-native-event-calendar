@@ -1,15 +1,21 @@
 import React, { useRef, useState } from 'react';
 import { Button, Dimensions, SafeAreaView, Text, TextInput, useWindowDimensions, View, StyleSheet } from 'react-native';
+import moment from 'moment';
 import { EventCalendar, AgendaView } from './src';
+import { DAY_IN_MILISECONDS } from './src/constants';
 
-import { newDate } from './src/utils';
+import { dateToString, newDate } from './src/utils';
 
 function addZero(number) {
   return number >= 10 ? number : `0${number}`;
 }
 
+// function generateDate(date, hour, min) {
+//   return `${date.getFullYear()}-${addZero(date.getMonth() + 1)}-${addZero(date.getDate())}T${addZero(hour)}:${addZero(min)}:00`;
+// }
+
 function generateDate(date, hour, min) {
-  return `${date.getFullYear()}-${addZero(date.getMonth() + 1)}-${addZero(date.getDate())}T${addZero(hour)}:${addZero(min)}:00`;
+  return `${date} ${addZero(hour)}:${addZero(min)}:00`;
 }
 
 function generateDateKey(date) {
@@ -21,15 +27,15 @@ const generateTime = (date) => (
 )
 
 
-function generateEvents(days) {
+function generateEvents(startDate, days) {
   const events = [];
-  const currentDate = new Date('2021-01-11T00:00:00');
+  const currentDate = moment(startDate);
   for (let day = 0; day < days; day++) {
     events.push({
       data: generateEventsByDate(currentDate),
-      date: generateDateKey(currentDate)
+      date: currentDate.format('YYYY-MM-DD'),
     })
-    currentDate.setTime(currentDate.getTime() + (24*60*60*1000))
+    currentDate.add(1, 'day');
   }
 
   return events;
@@ -40,24 +46,27 @@ function generateEventsHash(days) {
   const currentDate = new Date('2021-01-11T00:00:00');
   for (let day = 0; day < days; day++) {
     events[generateDateKey(currentDate)] = generateEventsByDate(currentDate)
-    currentDate.setTime(currentDate.getTime() + (24*60*60*1000))
+    currentDate.setTime(currentDate.getTime() + DAY_IN_MILISECONDS)
   }
 
   return events;
 }
 
-const generateEventsByDate = (date) => {
+const generateEventsByDate = (momentDate) => {
 
   let id = 1;
 
   const dayEvents = []
+  const date = momentDate.format('YYYY-MM-DD');
   for (let hour = 0; hour < 2; hour++) {
-      
+
     dayEvents.push({
       start: generateDate(date, hour, 0),
-      end: generateDate(date, hour +1, 0),
+      end: generateDate(date, hour + 1, 0),
       booking_type: 'blocked',
-      id
+      title: 'Rodrigo Monsalve',
+      subtitle: 'Corte de pelo',
+      id: `${date}-${id}`,
     })
     
     id+=1
@@ -65,7 +74,10 @@ const generateEventsByDate = (date) => {
     dayEvents.push({
       start: generateDate(date, hour, 0),
       end: generateDate(date, hour, 30),
-      id
+      booking_type: 'booking',
+      title: 'Rodrigo Monsalve',
+      subtitle: 'Corte de pelo',
+      id: `${date}-${id}`,
     })
 
     id+=1
@@ -73,7 +85,10 @@ const generateEventsByDate = (date) => {
     dayEvents.push({
       start: generateDate(date, hour, 30),
       end: generateDate(date, hour + 1, 0),
-      id
+      booking_type: 'booking',
+      title: 'Rodrigo Monsalve',
+      subtitle: 'Corte de pelo',
+      id: `${date}-${id}`,
     })
 
     id+=1
@@ -84,11 +99,13 @@ const generateEventsByDate = (date) => {
 }
 
 const App = () =>  {
- 
-  const [events, setEvents] = useState(generateEvents(5))
-  const [date, setDate] = useState('2021-01-11')
+  
+  // const [events, setEvents] = useState(generateEvents(5))
+  const [events, setEvents] = useState(generateEvents('2021-01-09', 5))
+  const [date, setDate] = useState('2021-01-11');
   const [goToDate, setGoToDate] = useState('')
   const [mode, setMode] = useState('agenda');
+  const [fetching, setFetching] = useState(false);
 
   const calendarRef = useRef(null);
   const agendaRef = useRef(null);
@@ -163,11 +180,30 @@ const App = () =>  {
 
   const renderSectionHeader = ({section}) => {
     return (
-      <View style={{backgroundColor: 'white'}}>
+      <View style={{backgroundColor: 'white', height: 30}}>
         <Text>{section.date}</Text>
       </View>
     )
   }
+
+  const onLimitReached = (direction) => {
+    console.log("limit reached")
+    console.log("fetchgin", fetching);
+    console.log("direction", direction);
+    // if (fetching) return;
+    // setFetching(true);
+    // const index = direction > 0 ? events.length - 1 : 0;
+    // const startDate = moment(events[index].date);
+    // // startDate.setTime(startDate.getTime() + (direction * (DAY_IN_MILISECONDS * 5)));
+    // startDate.add(direction * 5, 'days');
+    // const newEvents = generateEvents(startDate.format('YYYY-MM-DD'), 5);
+
+    // setEvents(direction > 0 ? events.concat(newEvents) : newEvents.concat(events));
+    // setFetching(false);
+    
+
+  }
+  
   
 
   return (
@@ -206,10 +242,12 @@ const App = () =>  {
               renderSectionHeader={renderSectionHeader}
               ref={agendaRef}
               onDateChange={onDateChange}
+              initialDate={date}
+              onLimitReached={onLimitReached}
+              itemHeight={70}
             />
           )
       }
-      
       
     </SafeAreaView>
   );
@@ -219,6 +257,7 @@ const styles = StyleSheet.create({
   event: {
     paddingVertical: 4,
     paddingHorizontal: 8,
+    height: 70,
   },
   eventText: {
     color: 'white',

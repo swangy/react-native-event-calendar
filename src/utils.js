@@ -6,6 +6,10 @@ export const addZero = (number) => number >= 10 ? number : `0${number}`;
 
 export const format24 = (date) => `${addZero(date.getHours())}:${addZero(date.getMinutes())}`;
 
+export const dateToString = (date) => (
+  `${date.getFullYear()}-${addZero(date.getMonth() + 1)}-${addZero(date.getDate())}`
+)
+
 export const nowTop = (start) => {
   const now = new Date()
   const nowInMinutes = now.getHours() * 60 + now.getMinutes();

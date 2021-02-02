@@ -1,16 +1,17 @@
 import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import moment from 'moment';
 
-const Event = ({
+const EventComponent = ({
     onPress,
     event,
-    style,
     renderEvent,
-    calendar
+    calendar,
+    style,
 }) => {
 
-  const onPresshandler = () => onPress(event)
-
+  const formatHour = (date) => (moment(date).format('HH:mm'));
+  const onPresshandler = () => onPress(event);
   return (
     <TouchableOpacity
       activeOpacity={0.5}
@@ -18,33 +19,35 @@ const Event = ({
       key={event.id}
       style={[styles.event, calendar && styles.calendar, style ]}
     >
-      {renderEvent(event)}
+      <Text style={styles.text}>{event.title}</Text>
+      <Text style={styles.text}>{`${formatHour(event.start)} - ${formatHour(event.end)}`}</Text>
+      <Text style={styles.text}>{event.subtitle}</Text>
     </TouchableOpacity>
   )
 };
 
-const MemoizedEvent = React.memo(Event)
+const MemoizedEvent = React.memo(EventComponent)
 
 export default MemoizedEvent;
 
 const styles = StyleSheet.create({
   event: {
     backgroundColor: '#4287f5',
-    opacity: 0.8,
+    opacity: 1,
     borderColor: '#4287f5',
     borderWidth: 0.5,
-    borderRadius: 8,
+    borderRadius: 10,
     flex: 1,
     flexDirection: 'column',
     alignItems: 'flex-start',
-    marginTop: 8,
-    marginHorizontal: 16,
+    paddingHorizontal: 8,
+    justifyContent: 'center',
   },
   calendar: {
     position: 'absolute',
     overflow: 'hidden',
-    marginVertical: 0,
-    marginHorizontal: 0
   },
-  
+  text: {
+    color: 'white',
+  }
 });
