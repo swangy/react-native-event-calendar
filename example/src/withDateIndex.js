@@ -77,18 +77,27 @@ export default (WrappedComponent) => (
     //   this.setState({events});
     // }
 
-    // static getDerivedStateFromProps(props,  ) {
-    //   console.log("new index", indexByDate(props.events, state.currentDate));
-    //   return {
-    //     currentIndex: indexByDate(props.events, state.currentDate),
-    //   }
-    // }
+    static getDerivedStateFromProps(props, state) {
+      if (props.events !== state.events) {
+        console.log("current index", state.currentIndex);
+        console.log("current date", state.currentDate);
+        console.log("new index", indexFlattedByDate(props.events, state.currentDate));
+        return {
+          events: props.events,
+          flattedEvents: flatEvents(props.events),
+          currentIndex: indexFlattedByDate(props.events, state.currentDate),
+        };
+      }
 
-    // componentDidUpdate(prevProps, prevState) {
-    //   if (prevProps.events !== this.props.events) {
-    //     this.wrappedRef.current.scrollToIndex(this.state.currentIndex)
-    //   }
-    // }
+      return null;
+    }
+
+    componentDidUpdate(prevProps, prevState) {
+      if (prevProps.events !== this.props.events) {
+        console.log("scroll to index")
+        this.wrappedRef.current.scrollToIndex(this.state.currentIndex)
+      }
+    }
 
     onDateChange(newDate) {
       const newIndex = indexByDate(this.props.events, newDate)
@@ -152,8 +161,10 @@ export default (WrappedComponent) => (
         this.setState({limitReached: true });
         onLimitReached(y > 0 ? 1 : -1);
       } 
+    }
 
-
+    scrollToIndex(index) {
+      this.wrappedRef.current.scrollToIndex(parseInt(index));
     }
 
     render() {

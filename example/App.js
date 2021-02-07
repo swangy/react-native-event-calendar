@@ -3,6 +3,7 @@ import { Button, Dimensions, SafeAreaView, Text, TextInput, useWindowDimensions,
 import moment from 'moment';
 import { EventCalendar, AgendaView } from './src';
 import { DAY_IN_MILISECONDS } from './src/constants';
+import AgendaViewSection from './src/AgendaViewSection';
 
 import { dateToString, newDate } from './src/utils';
 
@@ -166,7 +167,7 @@ const App = () =>  {
   const onEventTapped = (event) => {console.log("omg omg ogm")};
 
   const moveEvent = () => {
-    agendaRef.current.moveScrollView();
+    agendaRef.current.scrollToIndex(goToDate);
   }
 
   const onDateChange = (newDate) => {
@@ -190,17 +191,20 @@ const App = () =>  {
     console.log("limit reached")
     console.log("fetchgin", fetching);
     console.log("direction", direction);
-    // if (fetching) return;
-    // setFetching(true);
-    // const index = direction > 0 ? events.length - 1 : 0;
-    // const startDate = moment(events[index].date);
-    // // startDate.setTime(startDate.getTime() + (direction * (DAY_IN_MILISECONDS * 5)));
-    // startDate.add(direction * 5, 'days');
-    // const newEvents = generateEvents(startDate.format('YYYY-MM-DD'), 5);
-
-    // setEvents(direction > 0 ? events.concat(newEvents) : newEvents.concat(events));
-    // setFetching(false);
-    
+    let startDate;
+    if (direction > 0) {
+      startDate = moment(events[events.length - 1].date);
+      startDate.add(1, 'days');
+    } else {
+      setFetching(true);
+      startDate = moment(events[0].date);
+      startDate.subtract(5, 'days');
+    }
+    const newEvents = generateEvents(startDate.format('YYYY-MM-DD'), 5);
+    setTimeout(() => {
+      setEvents(direction > 0 ? events.concat(newEvents) : newEvents.concat(events));
+      setFetching(false);
+    }, 500);
 
   }
   
@@ -233,22 +237,19 @@ const App = () =>  {
             ref={calendarRef}
           />
           ) : (
-            <AgendaView
+            <AgendaViewSection
               events={events}
-              renderEvent={renderEvent}
               width={width}
-              render
               onEventPress={onEventTapped}
-              renderSectionHeader={renderSectionHeader}
               ref={agendaRef}
               onDateChange={onDateChange}
               initialDate={date}
               onLimitReached={onLimitReached}
               itemHeight={70}
+              loading={fetching}
             />
           )
       }
-      
     </SafeAreaView>
   );
 }
