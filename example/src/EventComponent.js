@@ -12,6 +12,15 @@ const EventComponent = ({
 
   const formatHour = (date) => (moment(date).format('HH:mm'));
   const onPresshandler = () => onPress(event);
+
+  if (event.booking_type === 'empty') {
+    return (
+      <View style={[styles.empty, style]}>
+        <Text>No events booked</Text>
+      </View>
+    )
+  }
+
   return (
     <TouchableOpacity
       activeOpacity={0.5}
@@ -49,5 +58,11 @@ const styles = StyleSheet.create({
   },
   text: {
     color: 'white',
-  }
+  },
+  empty: {
+    flex: 1,
+    backgroundColor: 'white',
+    justifyContent: 'center',
+    paddingHorizontal: 8,
+  },
 });

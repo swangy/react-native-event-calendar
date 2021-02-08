@@ -6,14 +6,12 @@ import { DAY_IN_MILISECONDS } from './src/constants';
 import AgendaViewSection from './src/AgendaViewSection';
 
 import { dateToString, newDate } from './src/utils';
+import DaySectionHeader from './src/DaySectionHeader';
+import AgendaEvent from './src/AgendaEvent';
 
 function addZero(number) {
   return number >= 10 ? number : `0${number}`;
 }
-
-// function generateDate(date, hour, min) {
-//   return `${date.getFullYear()}-${addZero(date.getMonth() + 1)}-${addZero(date.getDate())}T${addZero(hour)}:${addZero(min)}:00`;
-// }
 
 function generateDate(date, hour, min) {
   return `${date} ${addZero(hour)}:${addZero(min)}:00`;
@@ -23,31 +21,15 @@ function generateDateKey(date) {
   return `${date.getFullYear()}-${addZero(date.getMonth() + 1)}-${addZero(date.getDate())}`
 }
 
-const generateTime = (date) => (
-  `${addZero(date.getHours(date))}:${addZero(date.getMinutes())}`
-)
-
-
 function generateEvents(startDate, days) {
   const events = [];
   const currentDate = moment(startDate);
   for (let day = 0; day < days; day++) {
     events.push({
-      data: generateEventsByDate(currentDate),
+      data: day === days - 1 ? generateEmptyEvent() : generateEventsByDate(currentDate),
       date: currentDate.format('YYYY-MM-DD'),
     })
     currentDate.add(1, 'day');
-  }
-
-  return events;
-}
-
-function generateEventsHash(days) {
-  const events = {};
-  const currentDate = new Date('2021-01-11T00:00:00');
-  for (let day = 0; day < days; day++) {
-    events[generateDateKey(currentDate)] = generateEventsByDate(currentDate)
-    currentDate.setTime(currentDate.getTime() + DAY_IN_MILISECONDS)
   }
 
   return events;
@@ -99,10 +81,14 @@ const generateEventsByDate = (momentDate) => {
   return dayEvents;
 }
 
+const generateEmptyEvent = () => ([{
+  booking_type: 'empty',
+}])
+ 
+
 const App = () =>  {
   
-  // const [events, setEvents] = useState(generateEvents(5))
-  const [events, setEvents] = useState(generateEvents('2021-01-09', 5))
+  const [events, setEvents] = useState(generateEvents('2021-01-09', 5));
   const [date, setDate] = useState('2021-01-11');
   const [goToDate, setGoToDate] = useState('')
   const [mode, setMode] = useState('agenda');
@@ -113,62 +99,14 @@ const App = () =>  {
 
   const width = Dimensions.get('window').width;
 
-  const renderEvent = (event) => {
 
-    const startDate = new Date(event.start)
-    const endDate = new Date(event.end)
-
-    return (
-      <View style={styles.event}>
-        <Text style={styles.eventText}>Rodrigo Monsalve</Text>
-        <Text style={styles.eventText}>{`${generateTime(startDate)}-${generateTime(endDate)}`}</Text>
-        <Text style={styles.eventText}>Rodrigo Monsalve</Text>
-      </View>
-    );
-  }
-
-  const renderEventDay = (event) => {
-
-    const startDate = new Date(event.start)
-    const endDate = new Date(event.end)
-
-    return (
-      <View>
-        <Text style={styles.eventText}>Rodrigo Monsalve</Text>
-        <Text style={styles.eventText}>{`${generateTime(startDate)}-${generateTime(endDate)}`}</Text>
-        <Text style={styles.eventText}>Rodrigo Monsalve</Text>
-      </View>
-    );
-  }
-
-  const addEventStart = () => {
-    const addDate = newDate(goToDate);
-    const event = {
-      data: generateEventsByDate(addDate),
-      date: generateDateKey(addDate)
+  const goToDateHandler = () => {
+    if (mode === 'agenda') {
+      agendaRef.current.goToDate(goToDate);
     }
-    const newEvents = events.slice()
-    newEvents.unshift(event)
-    setEvents(newEvents)
-  }
-
-  // const onDateChange = (date) => {
-  //   this.setState({date})
-  // };
-
-  // onChangeText(date) {
-  //   this.setState({goToDate: date})
-  // }
-
-  const onPressHandler = () => {
-    calendarRef.current.goToDate(goToDate);
   }
 
   const onEventTapped = (event) => {console.log("omg omg ogm")};
-
-  const moveEvent = () => {
-    agendaRef.current.scrollToIndex(goToDate);
-  }
 
   const onDateChange = (newDate) => {
     setDate(newDate)
@@ -177,20 +115,8 @@ const App = () =>  {
   const toggleMode = () => {
     mode === 'agenda' ? setMode('day') : setMode('agenda')
   }
-  
-
-  const renderSectionHeader = ({section}) => {
-    return (
-      <View style={{backgroundColor: 'white', height: 30}}>
-        <Text>{section.date}</Text>
-      </View>
-    )
-  }
 
   const onLimitReached = (direction) => {
-    console.log("limit reached")
-    console.log("fetchgin", fetching);
-    console.log("direction", direction);
     let startDate;
     if (direction > 0) {
       startDate = moment(events[events.length - 1].date);
@@ -207,7 +133,20 @@ const App = () =>  {
     }, 500);
 
   }
-  
+
+  const renderSectionHeader = ({section}) => {
+    return (
+      <DaySectionHeader date={section.date} />
+    )
+  }
+
+  const renderItem = ({ item }) => (
+    <AgendaEvent event={item} onEventPress={onEventTapped} />
+  );
+
+  const renderDayFooter = () => (
+    <View style={{ height: 1, backgroundColor: '#D0D0D0' }} />
+  )
   
 
   return (
@@ -215,10 +154,7 @@ const App = () =>  {
       <Text style={{textAlign: 'center'}}>{date}</Text>
       <View style={{}}>
         <TextInput value={goToDate} onChangeText={setGoToDate}/>
-        <Button style={{backgroundColor: 'green', heigth: 200}} title="Ir omg is this real " onPress={onPressHandler} />
-        <Button title="Add" onPress={addEventStart} />
-        <Button title="Move event" onPress={moveEvent} />
-        <Button title="Change Mode" onPress={toggleMode} />
+        <Button title="Go to Date" onPress={goToDateHandler} />
       </View>
 
       { 
@@ -245,8 +181,12 @@ const App = () =>  {
               onDateChange={onDateChange}
               initialDate={date}
               onLimitReached={onLimitReached}
-              itemHeight={70}
+              renderEvent={renderItem}
+              itemHeight={78}
               loading={fetching}
+              sectionHeaderHeight={36}
+              renderSectionHeader={renderSectionHeader}
+              renderDayFooter={renderDayFooter}
             />
           )
       }
