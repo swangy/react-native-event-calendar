@@ -107,28 +107,20 @@ class AgendaViewSection extends Component {
   }
 
   onScroll({ nativeEvent }) {
-    const { contentOffset: { y } } = nativeEvent;
+    if (nativeEvent.contentOffset.y > 0) return;
+    if (this.state.limitReached) return;
 
-    const { limitReached } = this.state;
-    const { onLimitReached } = this.props;
-    const limit = 0;
-
-    if (limitReached) return;
-    if (y <= limit) {
-      this.setState({ limitReached: true });
-      onLimitReached(-1);
-    }
+    this.setState({ limitReached: true });
+    this.props.onLimitReached(-1);
   }
 
   onViewableItemsChanged({ viewableItems }) {
-    const { currentDate } = this.state;
-    const { onDateChange } = this.props;
-    if (!viewableItems[0]) return;
+    if (!viewableItems.length) return;
     const viewableDate = viewableItems[0].section.date;
-    if (viewableDate === currentDate) return;
+    if (viewableDate === this.state.currentDate) return;
 
     this.setState({ currentDate: viewableDate });
-    onDateChange(viewableDate);
+    this.props.onDateChange(viewableDate);
   }
 
   onEndReached() {
