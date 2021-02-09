@@ -5,7 +5,6 @@ import moment from 'moment';
 const EventComponent = ({
     onPress,
     event,
-    renderEvent,
     calendar,
     style,
 }) => {
@@ -55,6 +54,7 @@ const styles = StyleSheet.create({
   calendar: {
     position: 'absolute',
     overflow: 'hidden',
+    justifyContent: 'flex-start',
   },
   text: {
     color: 'white',

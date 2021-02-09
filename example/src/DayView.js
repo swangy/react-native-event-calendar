@@ -9,12 +9,8 @@ import { newDate, format24, nowTop } from './utils';
 import Event from './AgendaEvent';
 
 const LEFT_MARGIN = 60 - 1;
-// const RIGHT_MARGIN = 10
 const CALENDER_HEIGHT = 2400;
-// const EVENT_TITLE_HEIGHT = 15
 const TEXT_LINE_HEIGHT = 17;
-// const MIN_EVENT_TITLE_WIDTH = 20
-// const EVENT_PADDING_LEFT = 4
 
 function range(from, to) {
   return Array.from(Array(to), (_, i) => from + i);
@@ -88,11 +84,11 @@ const DayView = React.forwardRef(({
     });
   };
 
-  const eventTappedHandler = (event) => { onEventTapped(event); };
 
   const renderEvents = () => {
     const componentEvents = packedEvents.map((event, i) => {
-      if (event.booking_type === "blocked") return null;
+      if (event.booking_type === "blocked" || event.booking_type === "empty") return null;
+      
       const style = {
         left: event.left,
         height: event.height,
@@ -100,28 +96,8 @@ const DayView = React.forwardRef(({
         top: event.top,
       };
 
-      const eventColor = {
-        backgroundColor: event.color,
-        boderColor: event.boderColor,
-      };
 
-      // Fixing the number of lines for the event title makes this calculation easier.
-      // However it would make sense to overflow the title to a new line if needed
-      const numberOfLines = Math.floor(event.height / TEXT_LINE_HEIGHT);
-      const formatTime = format24h ? 'HH:mm' : 'hh:mm A';
-
-      const renderThisEvent = () => renderEvent(event);
-
-      return (
-        <Event
-          event={event}
-          onPress={eventTappedHandler}
-          renderEvent={renderThisEvent}
-          style={[styles.event, style, event.color && eventColor]}
-          calendar
-          key={event.id}
-        />
-      )
+      return renderEvent({event, style})
     });
 
     return (
@@ -202,7 +178,7 @@ const DayView = React.forwardRef(({
     <View style={{ flex:1, width }}>
       <ScrollView
         contentContainerStyle={[styles.contentStyle, { width }]}
-        showsVerticalScrollIndicator={true}
+        showsVerticalScrollIndicator
         contentOffset={{ y: contentOffset }}
         refreshControl={refreshControl}
         onMomentumScrollEnd={onMomentumScrollEnd}

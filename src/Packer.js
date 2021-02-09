@@ -1,29 +1,24 @@
-// @flow
+import moment from 'moment';
 
 const blockHeight = 100;
 const minutesPerBlock = 30;
 
 const heightPerMinute = blockHeight / minutesPerBlock;
 
-function diffInMInutes(dateA, dateB) {
-  return (dateA.getTime() - dateB.getTime()) / (1000 * 60)
-}
-
 function buildEvent(column, left, width, dayStart, startKey, endKey) {
-  const startTime = new Date(column[startKey]);
+  const startTime = moment(column[startKey]);
   const endTime = column[endKey]
-    ? new Date(column[endKey])
-    : new Date(startTime.getTime() + (1000 * 60 * 60))
-  const dayStartTime = new Date(startTime.getTime())
-  dayStartTime.setHours(dayStart)
-  dayStartTime.setMinutes(0)
-
-  
-  const diffMinutes = diffInMInutes(startTime, dayStartTime)
+    ? moment(column[endKey])
+    : startTime.clone().add(1, 'hour');
+  const dayStartTime = startTime
+    .clone()
+    .hour(dayStart)
+    .minute(0);
+  const diffMinutes = startTime.diff(dayStartTime, 'minutes', true);
   const positiveDiff = diffMinutes > 0;
 
   column.top = (positiveDiff ? diffMinutes : 0) * ( blockHeight / minutesPerBlock );
-  column.height = (diffInMInutes(endTime, startTime) + (positiveDiff ? 0 : diffMinutes)) * heightPerMinute
+  column.height = (endTime.diff(startTime, 'minutes', true) + (positiveDiff ? 0 : diffMinutes)) * heightPerMinute
   column.width = width;
   column.left = left;
 

@@ -8,6 +8,7 @@ import AgendaViewSection from './src/AgendaViewSection';
 import { dateToString, newDate } from './src/utils';
 import DaySectionHeader from './src/DaySectionHeader';
 import AgendaEvent from './src/AgendaEvent';
+import EventComponent from './src/EventComponent';
 
 function addZero(number) {
   return number >= 10 ? number : `0${number}`;
@@ -144,6 +145,12 @@ const App = () =>  {
     <AgendaEvent event={item} onEventPress={onEventTapped} />
   );
 
+  const renderEventDay = ({ event, style }) => {
+    return (
+      <EventComponent key={event.id} calendar event={event} onPress={onEventTapped} style={style} />
+    )
+  };
+
   const renderDayFooter = () => (
     <View style={{ height: 1, backgroundColor: '#D0D0D0' }} />
   )
@@ -155,6 +162,7 @@ const App = () =>  {
       <View style={{}}>
         <TextInput value={goToDate} onChangeText={setGoToDate}/>
         <Button title="Go to Date" onPress={goToDateHandler} />
+        <Button title="Change Calendar Mode" onPress={toggleMode} />
       </View>
 
       { 
