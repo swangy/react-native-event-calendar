@@ -160,11 +160,10 @@ const App = () =>  {
     <SafeAreaView style={{flex: 1}}>
       <Text style={{textAlign: 'center'}}>{date}</Text>
       <View style={{}}>
-        <TextInput value={goToDate} onChangeText={setGoToDate}/>
+        <TextInput value={goToDate} onChangeText={setGoToDate} style={{borderBottomColor: 'grey', borderBottomWidth: 1, marginBottom: 8, }} />
         <Button title="Go to Date" onPress={goToDateHandler} />
         <Button title="Change Calendar Mode" onPress={toggleMode} />
       </View>
-
       { 
         mode === 'day'
         ? (

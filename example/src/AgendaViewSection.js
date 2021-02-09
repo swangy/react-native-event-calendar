@@ -23,6 +23,10 @@ function indexFlattedByDate(events, date) {
   return flattedIndex;
 }
 
+function filterEvents(events) {
+  
+}
+
 class AgendaViewSection extends Component {
   constructor(props) {
     super(props);
