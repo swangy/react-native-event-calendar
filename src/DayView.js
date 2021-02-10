@@ -21,6 +21,8 @@ const DayView = React.forwardRef(({
   date,
   end,
   events,
+  format24h,
+  onEventTapped,
   renderEvent,
   start,
   styles,
@@ -47,13 +49,9 @@ const DayView = React.forwardRef(({
   }, []);
 
   const renderRedLine = () => {
-    const now = new Date();
-    const dateObject = newDate(date)
-    if ( now.getDate() !== dateObject.getDate()
-         || now.getMonth() !== dateObject.getMonth() 
-         || now.getFullYear() !== dateObject.getFullYear()) { return null };
-
-    const top = nowTop(start);
+    const now = moment();
+    if (!now.isSame(date, 'day')) return null;
+    const top = nowTop();
     const lineWidth = width - 20;
     return (
       <>
@@ -64,13 +62,12 @@ const DayView = React.forwardRef(({
   };
 
   const renderLines = () => {
-    const time = new Date()
-    time.setHours(start, 0, 0)
+    const time = moment().hour(start).minute(0);
     const lines = (((end - start) * 60) / MINUTES_PER_BLOCK);
 
     return [...Array(lines).keys()].map((i) => {
-      const timeText = format24(time)
-      time.setTime(time.getTime() + (MINUTES_PER_BLOCK * 60 * 1000 ))
+      const timeText = format24h ? time.format('HH:mm') : time.format('HH:mm A');
+      time.add(MINUTES_PER_BLOCK, 'minutes');
       return (
         <View key={timeText}>
           <Text style={[styles.timeLabel, { top: BLOCK_HEIGHT * i - 6 }]}>
@@ -81,6 +78,7 @@ const DayView = React.forwardRef(({
       );
     });
   };
+
 
   const renderEvents = () => {
     const componentEvents = packedEvents.map((event, i) => {
@@ -109,21 +107,17 @@ const DayView = React.forwardRef(({
     const lineWidth = 4;
     const lineMargin = 8;
     return blockedEvents.filter((event) => { 
-      return new Date(event[endKey]).getHours() >= start && new Date(event[startKey]).getHours() <= end;
+      return moment(event[endKey]).hour() >= start && moment(event[startKey]).hour() <= end;
     }).map((event) => {
-      const eventStart = new Date(event[startKey]);
-      const eventEnd = new Date(event[endKey]);
-      const dayStartTime = new Date(eventStart.getTime())
-      dayStartTime.setHours(start, 0, 0)
+      const eventStart = moment(event[startKey]);
+      const eventEnd = moment(event[endKey]);
+      const dayStartTime = eventStart.clone().hour(start).minute(0);
 
-      const dayEndtime = new Date(eventStart.getTime())
-      dayEndtime.setHours(end, 0, 0)
+      const blockStart = eventStart.hour() < start ? dayStartTime : eventStart;
+      const blockEnd = eventEnd.hour() > end ? eventStart.clone().hour(end).minute(0) : eventEnd;
 
-      const blockStart = eventStart.getHours() < start ? dayStartTime : eventStart;
-      const blockEnd = eventEnd.getHours() > end ? dayEndtime : eventEnd;
-
-      const top = (blockStart.getTime() - dayStartTime.getTime()) / (1000 * 60) * HEIGHT_PER_MINUTE
-      const height = (blockEnd.getTime() - blockStart.getTime()) / (1000 * 60) * HEIGHT_PER_MINUTE
+      const top = blockStart.diff(dayStartTime, 'minutes', true) * HEIGHT_PER_MINUTE;
+      const height = blockEnd.diff(blockStart, 'minutes', true) * HEIGHT_PER_MINUTE;
 
 
       const rotatedLineWidth = rotatedLenght(lineWidth);
@@ -175,7 +169,7 @@ const DayView = React.forwardRef(({
     <View style={{ flex:1, width }}>
       <ScrollView
         contentContainerStyle={[styles.contentStyle, { width }]}
-        showsVerticalScrollIndicator={true}
+        showsVerticalScrollIndicator
         contentOffset={{ y: contentOffset }}
         refreshControl={refreshControl}
         onMomentumScrollEnd={onMomentumScrollEnd}
