@@ -27,7 +27,7 @@ function generateEvents(startDate, days) {
   const currentDate = moment(startDate);
   for (let day = 0; day < days; day++) {
     events.push({
-      data: day === days - 1 ? generateEmptyEvent() : generateEventsByDate(currentDate),
+      data: day === days - 1 ? generateBlockedEvent() : generateEventsByDate(currentDate),
       date: currentDate.format('YYYY-MM-DD'),
     })
     currentDate.add(1, 'day');
@@ -82,8 +82,8 @@ const generateEventsByDate = (momentDate) => {
   return dayEvents;
 }
 
-const generateEmptyEvent = () => ([{
-  booking_type: 'empty',
+const generateBlockedEvent = () => ([{
+  booking_type: 'blocked',
 }])
  
 
@@ -140,7 +140,7 @@ const App = () =>  {
       <DaySectionHeader date={section.date} />
     )
   }
-
+ 
   const renderItem = ({ item }) => (
     <AgendaEvent event={item} onEventPress={onEventTapped} />
   );
