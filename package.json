@@ -1,6 +1,6 @@
 {
   "name": "@agendapro/react-native-events-calendar",
-  "version": "0.2.2",
+  "version": "0.3.0",
   "description": "show calendar events by date",
   "main": "./src/index.js",
   "scripts": {
@@ -19,7 +19,8 @@
   ],
   "dependencies": {
     "lodash": "^4.17.4",
-    "moment": "^2.18.1"
+    "moment": "^2.24.0",
+    "@stream-io/flat-list-mvcp": "0.0.5"
   },
   "devDependencies": {
     "husky": "^0.14.3",
