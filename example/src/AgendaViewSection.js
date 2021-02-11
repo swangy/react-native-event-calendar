@@ -1,15 +1,7 @@
-import React, { Component, memo } from 'react';
-import { View, Text, SectionList, ActivityIndicator, StyleSheet } from 'react-native';
+import React, { Component } from 'react';
+import { View, SectionList, ActivityIndicator, StyleSheet } from 'react-native';
 import sectionListGetItemLayout from 'react-native-section-list-get-item-layout'
-import { FlatList } from '@stream-io/flat-list-mvcp';
-import AgendaEvent from './AgendaEvent';
-import { DAY_IN_MILISECONDS } from './constants';
-import Event from './EventComponent';
-import { dateToString, indexByDate, newDate } from './utils';
-import withDateIndex from './withDateIndex';
-import moment from 'moment';
-
-const ITEM_HEIGHT = 70;
+import { indexByDate } from './utils';
 
 // Get index if sections and data where flattened
 // SectionView's intitialScrollIndex prop use a index like every data and 
