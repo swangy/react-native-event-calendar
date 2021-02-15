@@ -58,6 +58,7 @@ class AgendaViewSection extends Component {
     this.flatListRef = React.createRef();
     this.onViewableItemsChanged = this.onViewableItemsChanged.bind(this);
     this.onEndReached = this.onEndReached.bind(this);
+    this.footerLoader = this.footerLoader.bind(this);
 
     // Different components Height is mandatory to compute correctly intial date position
     this.getItemLayout = sectionListGetItemLayout({
@@ -144,7 +145,7 @@ class AgendaViewSection extends Component {
   // that is part of the scroll
   footerLoader() {
     return (
-      <ActivityIndicator size="large" style={styles.footer}/>
+      <ActivityIndicator size="large" style={styles.footer} color={this.props.footerActivityColor}/>
     )
   }
 
@@ -200,14 +201,5 @@ const styles = StyleSheet.create({
   }
 });
 
-
-
-// const arePropsEqual = (prevProps, nextProps) => {
-//   return prevProps.events === nextProps.events
-// }
-
-// const memoizedAgendaViewSection = React.memo(AgendaViewSection, arePropsEqual);
-
-// const AgendaViewSectionWithDateIndex = withDateIndex(memoizedAgendaViewSection);
 
 export default AgendaViewSection;
