@@ -22,12 +22,12 @@ export default AgendaEvent;
 const styles = StyleSheet.create({
   container: {
     height: 78,
+    width: '100%',
     flexDirection: 'row',
-    flex: 1,
-    paddingBottom: 8,
     paddingHorizontal: 16,
   },
   event: {
     paddingLeft: 16,
+    height: 70,
   }
 });

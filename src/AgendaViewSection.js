@@ -84,10 +84,6 @@ class AgendaViewSection extends Component {
     }
   }
 
-  keyExtractor(item) {
-    return item.id
-  }
-
   goToDate(date) {
     const { events } = this.state;
 
@@ -154,7 +150,7 @@ class AgendaViewSection extends Component {
 
   render() {
     const { events, initialIndex } = this.state;
-    const { width, loading, renderSectionHeader, renderEvent, renderDayFooter } = this.props;
+    const { width, loading, renderSectionHeader, renderEvent, renderDayFooter, keyExtractor } = this.props;
 
     if (loading) {
       return (
@@ -172,7 +168,7 @@ class AgendaViewSection extends Component {
           sections={events}
           renderItem={renderEvent}
           renderSectionHeader={renderSectionHeader}
-          keyExtractor={this.keyExtractor}
+          keyExtractor={keyExtractor}
           getItemLayout={this.getItemLayout}
           ref={this.flatListRef}
           initialScrollIndex={initialIndex}

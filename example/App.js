@@ -154,7 +154,8 @@ const App = () =>  {
   const renderDayFooter = () => (
     <View style={{ height: 1, backgroundColor: '#D0D0D0' }} />
   )
-  
+
+  const agendaKeyExtractor = (item, index) => index;
 
   return (
     <SafeAreaView style={{flex: 1}}>
@@ -191,9 +192,10 @@ const App = () =>  {
               renderEvent={renderItem}
               itemHeight={78}
               loading={fetching}
-              sectionHeaderHeight={36}
+              sectionHeaderHeight={40}
               renderSectionHeader={renderSectionHeader}
               renderDayFooter={renderDayFooter}
+              keyExtractor={agendaKeyExtractor}
             />
           )
       }
@@ -206,6 +208,7 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
     paddingHorizontal: 8,
     height: 70,
+    width: '100%',
   },
   eventText: {
     color: 'white',
