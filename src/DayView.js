@@ -51,7 +51,7 @@ const DayView = React.forwardRef(({
   const renderRedLine = () => {
     const now = moment();
     if (!now.isSame(date, 'day')) return null;
-    const top = nowTop();
+    const top = nowTop(start);
     const lineWidth = width - 20;
     return (
       <>

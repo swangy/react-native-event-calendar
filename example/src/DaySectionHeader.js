@@ -20,7 +20,7 @@ export default DaySectionHeader;
 
 const styles = StyleSheet.create({
   container: {
-    height: 36,
+    height: 40,
     flexDirection: 'row',
     backgroundColor: 'white',
     paddingLeft: 16,
