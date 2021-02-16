@@ -104,6 +104,8 @@ const App = () =>  {
   const goToDateHandler = () => {
     if (mode === 'agenda') {
       agendaRef.current.goToDate(goToDate);
+    } else {
+      calendarRef.current.goToDate(goToDate);
     }
   }
 
