@@ -19,6 +19,9 @@ import {HEIGHT_PER_MINUTE} from './constants';
 import { nowTop } from './utils';
 
 const DAY_IN_MILISECONDS = 86400000
+
+const DAILY_MODE = 'daily';
+const AGENDA_MODE = 'agenda';
 export default class EventCalendar extends React.Component {
 
   static addZero(number) {
@@ -166,7 +169,7 @@ export default class EventCalendar extends React.Component {
         headerStyle={headerStyle}
         renderEvent={renderEvent}
         onEventTapped={onEventTapped}
-        events={item.events}
+        events={item.data}
         width={width}
         styles={this.calendarStyle}
         start={start}

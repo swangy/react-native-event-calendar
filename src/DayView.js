@@ -6,14 +6,11 @@ import _ from 'lodash';
 import populateEvents from './Packer';
 import {MINUTES_PER_BLOCK, BLOCK_HEIGHT, HEIGHT_PER_MINUTE} from './constants';
 import { newDate, format24, nowTop } from './utils';
+import Event from './AgendaEvent';
 
 const LEFT_MARGIN = 60 - 1;
-// const RIGHT_MARGIN = 10
 const CALENDER_HEIGHT = 2400;
-// const EVENT_TITLE_HEIGHT = 15
 const TEXT_LINE_HEIGHT = 17;
-// const MIN_EVENT_TITLE_WIDTH = 20
-// const EVENT_PADDING_LEFT = 4
 
 function range(from, to) {
   return Array.from(Array(to), (_, i) => from + i);
@@ -52,12 +49,8 @@ const DayView = React.forwardRef(({
   }, []);
 
   const renderRedLine = () => {
-    const now = new Date();
-    const dateObject = newDate(date)
-    if ( now.getDate() !== dateObject.getDate()
-         || now.getMonth() !== dateObject.getMonth() 
-         || now.getFullYear() !== dateObject.getFullYear()) { return null };
-
+    const now = moment();
+    if (!now.isSame(date, 'day')) return null;
     const top = nowTop(start);
     const lineWidth = width - 20;
     return (
@@ -69,13 +62,12 @@ const DayView = React.forwardRef(({
   };
 
   const renderLines = () => {
-    const time = new Date()
-    time.setHours(start, 0, 0)
+    const time = moment().hour(start).minute(0);
     const lines = (((end - start) * 60) / MINUTES_PER_BLOCK);
 
     return [...Array(lines).keys()].map((i) => {
-      const timeText = format24(time)
-      time.setTime(time.getTime() + (MINUTES_PER_BLOCK * 60 * 1000 ))
+      const timeText = format24h ? time.format('HH:mm') : time.format('HH:mm A');
+      time.add(MINUTES_PER_BLOCK, 'minutes');
       return (
         <View key={timeText}>
           <Text style={[styles.timeLabel, { top: BLOCK_HEIGHT * i - 6 }]}>
@@ -87,11 +79,11 @@ const DayView = React.forwardRef(({
     });
   };
 
-  const eventTappedHandler = (event) => { onEventTapped(event); };
 
   const renderEvents = () => {
     const componentEvents = packedEvents.map((event, i) => {
-      if (event.booking_type === "blocked") return null;
+      if (event.booking_type === "blocked" || event.booking_type === "empty") return null;
+      
       const style = {
         left: event.left,
         height: event.height,
@@ -99,45 +91,8 @@ const DayView = React.forwardRef(({
         top: event.top,
       };
 
-      const eventColor = {
-        backgroundColor: event.color,
-        boderColor: event.boderColor,
-      };
 
-      // Fixing the number of lines for the event title makes this calculation easier.
-      // However it would make sense to overflow the title to a new line if needed
-      const numberOfLines = Math.floor(event.height / TEXT_LINE_HEIGHT);
-      const formatTime = format24h ? 'HH:mm' : 'hh:mm A';
-      return (
-        <TouchableOpacity
-          activeOpacity={0.5}
-          onPress={() => eventTappedHandler(event)}
-          key={event.id}
-          style={[styles.event, style, event.color && eventColor]}
-        >
-          { renderEvent(event) || (
-            <View>
-              <Text numberOfLines={1} style={styles.eventTitle}>
-                {event.title || 'Event'}
-              </Text>
-              {numberOfLines > 1 ? (
-                <Text
-                  numberOfLines={numberOfLines - 1}
-                  style={[styles.eventSummary]}
-                >
-                  {event.summary || ' '}
-                </Text>
-              ) : null}
-              {numberOfLines > 2 ? (
-                <Text style={styles.eventTimes} numberOfLines={1}>
-                  {moment(event[startKey]).format(formatTime)} - {' '}
-                  {moment(event[endKey]).format(formatTime)}
-                </Text>
-              ) : null}
-            </View>
-          )}
-        </TouchableOpacity>
-      );
+      return renderEvent({event, style})
     });
 
     return (
@@ -152,21 +107,17 @@ const DayView = React.forwardRef(({
     const lineWidth = 4;
     const lineMargin = 8;
     return blockedEvents.filter((event) => { 
-      return new Date(event[endKey]).getHours() >= start && new Date(event[startKey]).getHours() <= end;
+      return moment(event[endKey]).hour() >= start && moment(event[startKey]).hour() <= end;
     }).map((event) => {
-      const eventStart = new Date(event[startKey]);
-      const eventEnd = new Date(event[endKey]);
-      const dayStartTime = new Date(eventStart.getTime())
-      dayStartTime.setHours(start, 0, 0)
+      const eventStart = moment(event[startKey]);
+      const eventEnd = moment(event[endKey]);
+      const dayStartTime = eventStart.clone().hour(start).minute(0);
 
-      const dayEndtime = new Date(eventStart.getTime())
-      dayEndtime.setHours(end, 0, 0)
+      const blockStart = eventStart.hour() < start ? dayStartTime : eventStart;
+      const blockEnd = eventEnd.hour() > end ? eventStart.clone().hour(end).minute(0) : eventEnd;
 
-      const blockStart = eventStart.getHours() < start ? dayStartTime : eventStart;
-      const blockEnd = eventEnd.getHours() > end ? dayEndtime : eventEnd;
-
-      const top = (blockStart.getTime() - dayStartTime.getTime()) / (1000 * 60) * HEIGHT_PER_MINUTE
-      const height = (blockEnd.getTime() - blockStart.getTime()) / (1000 * 60) * HEIGHT_PER_MINUTE
+      const top = blockStart.diff(dayStartTime, 'minutes', true) * HEIGHT_PER_MINUTE;
+      const height = blockEnd.diff(blockStart, 'minutes', true) * HEIGHT_PER_MINUTE;
 
 
       const rotatedLineWidth = rotatedLenght(lineWidth);
@@ -177,20 +128,25 @@ const DayView = React.forwardRef(({
 
       const linesQuantity = Math.floor(((blockWidth) / (rotatedLineWidth + rotatedLineMargin)) * 2.1);
 
-      const lines = [...Array(linesQuantity)].map((i) => (
-        <View
-          key={i}
-          style={[
-            styles.blockedLine,
-            {
-              width: lineWidth,
-              marginRight: lineMargin,
-              height: rotatedHeight,
-              left: height * -1,
-            },
-          ]}
-        />
-      ));
+      let lines = [];
+
+      for (let index = 1; index <= linesQuantity; index++) {
+        lines.push(
+          <View
+            key={index}
+            style={[
+              styles.blockedLine,
+              {
+                width: lineWidth,
+                marginRight: lineMargin,
+                height: rotatedHeight,
+                left: height * -1,
+              },
+            ]}
+          />
+        )
+      }
+
       return (
         <View
           style={[
@@ -213,7 +169,7 @@ const DayView = React.forwardRef(({
     <View style={{ flex:1, width }}>
       <ScrollView
         contentContainerStyle={[styles.contentStyle, { width }]}
-        showsVerticalScrollIndicator={true}
+        showsVerticalScrollIndicator
         contentOffset={{ y: contentOffset }}
         refreshControl={refreshControl}
         onMomentumScrollEnd={onMomentumScrollEnd}
@@ -232,6 +188,8 @@ const DayView = React.forwardRef(({
 const arePropsEqual = (prevProps, nextProps) => {
   return prevProps.events === nextProps.events
 }
+
+// export default DayView;
 
 const MemoizedDayView = React.memo(DayView, arePropsEqual)
 
