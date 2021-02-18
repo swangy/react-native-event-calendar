@@ -1,5 +1,5 @@
 // @flow
-import { View, Text, ScrollView, TouchableOpacity, Platform, Pressable } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, Platform, Pressable, Vibration } from 'react-native';
 import React, { useEffect, useRef, useState } from 'react';
 import moment from 'moment';
 import _, { camelCase } from 'lodash';
@@ -106,6 +106,7 @@ const DayView = React.forwardRef(({
   const rotatedLenght = (lenght) => (Math.sqrt(2 * (lenght ** 2)));
 
   const onCalendarLongPress = ({ nativeEvent }) => {
+    Vibration.vibrate();
     setNewEventTop(Math.floor(nativeEvent.locationY / BLOCK_HEIGHT) * BLOCK_HEIGHT);
   };
 
