@@ -106,7 +106,7 @@ const DayView = React.forwardRef(({
   const rotatedLenght = (lenght) => (Math.sqrt(2 * (lenght ** 2)));
 
   const onCalendarLongPress = ({ nativeEvent }) => {
-    Vibration.vibrate();
+    Vibration.vibrate(70);
     setNewEventTop(Math.floor(nativeEvent.locationY / BLOCK_HEIGHT) * BLOCK_HEIGHT);
   };
 
@@ -222,6 +222,7 @@ const DayView = React.forwardRef(({
           style={{ flex: 1 }}
           onLongPress={onCalendarLongPress}
           onPressOut={onCalendarPressOut}
+          delayLongPress={200}
         >
           {renderBlocks()}
           {renderLines()}
