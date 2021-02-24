@@ -79,9 +79,6 @@ export default (WrappedComponent) => (
 
     static getDerivedStateFromProps(props, state) {
       if (props.events !== state.events) {
-        console.log("current index", state.currentIndex);
-        console.log("current date", state.currentDate);
-        console.log("new index", indexFlattedByDate(props.events, state.currentDate));
         return {
           events: props.events,
           flattedEvents: flatEvents(props.events),
@@ -94,7 +91,6 @@ export default (WrappedComponent) => (
 
     componentDidUpdate(prevProps, prevState) {
       if (prevProps.events !== this.props.events) {
-        console.log("scroll to index")
         this.wrappedRef.current.scrollToIndex(this.state.currentIndex)
       }
     }
