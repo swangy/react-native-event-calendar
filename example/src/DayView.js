@@ -1,8 +1,7 @@
 // @flow
-import { View, Text, ScrollView, Platform } from 'react-native';
-import React, { useEffect } from 'react';
+import { View, Text, ScrollView, Platform, Pressable, Vibration } from 'react-native';
+import React, { useEffect, useState } from 'react';
 import moment from 'moment';
-import _ from 'lodash';
 import populateEvents from './Packer';
 import { BLOCK_HEIGHT } from './constants';
 import { nowTop, heightPerMinute } from './utils';
@@ -19,6 +18,8 @@ const DayView = React.forwardRef(({
   events,
   format24h,
   renderEvent,
+  renderPressEvent,
+  onLongPressOut,
   start,
   styles,
   width,
@@ -35,6 +36,8 @@ const DayView = React.forwardRef(({
   const blockedEvents = events.filter((e) => e.booking_type === 'blocked');
   const normalEvents = events.filter((e) => e.booking_type !== 'blocked');
   const packedEvents = populateEvents(normalEvents, containerWidth, start, startKey, endKey, orderEvents, minutesPerBlock);
+
+  const [newEventTop, setNewEventTop] = useState(null);
 
   useEffect(() => {
     if (Platform.OS === 'ios') return;
@@ -96,7 +99,46 @@ const DayView = React.forwardRef(({
   };
 
   const rotatedLenght = (lenght) => (Math.sqrt(2 * (lenght ** 2)));
-  
+
+  const onCalendarLongPress = ({ nativeEvent }) => {
+    Vibration.vibrate(70);
+    setNewEventTop(Math.floor(nativeEvent.locationY / BLOCK_HEIGHT) * BLOCK_HEIGHT);
+  };
+
+  const onCalendarPressOut = () => {
+    if (newEventTop === null) return;
+    const newStart = moment(date);
+    const blockIndex = newEventTop / BLOCK_HEIGHT;
+    newStart.hour(start);
+    newStart.add(blockIndex * MINUTES_PER_BLOCK, 'minutes');
+    const newEnd = newStart.clone();
+    newEnd.add(MINUTES_PER_BLOCK, 'minutes');
+
+    onLongPressOut({
+      start: newStart.format('YYYY-MM-DDTHH:mm:SS'),
+      end: newEnd.format('YYYY-MM-DDTHH:mm:SS'),
+    });
+    setNewEventTop(null);
+  };
+
+  const renderNewEvent = () => {
+    if (newEventTop === null) return null;
+
+    return (
+      <Pressable
+        style={{
+          height: BLOCK_HEIGHT,
+          position: 'absolute',
+          top: newEventTop,
+          flexDirection: 'row',
+          width: '100%',
+        }}
+      >
+        <View style={{ width: LEFT_MARGIN }} />
+        {renderPressEvent()}
+      </Pressable>
+    );
+  };
 
   const renderBlocks = () => {
     const lineWidth = 4;
@@ -161,7 +203,7 @@ const DayView = React.forwardRef(({
   };
 
   return (
-    <View style={{ flex:1, width }}>
+    <View style={{ flex: 1, width }}>
       <ScrollView
         contentContainerStyle={[styles.contentStyle, { width }]}
         showsVerticalScrollIndicator
@@ -171,10 +213,18 @@ const DayView = React.forwardRef(({
         onScrollEndDrag={onScrollEndDrag}
         ref={ref}
       >
-        {renderBlocks()}
-        {renderLines()}
-        {renderEvents()}
-        {renderRedLine()}
+        <Pressable
+          style={{ flex: 1 }}
+          onLongPress={onCalendarLongPress}
+          onPressOut={onCalendarPressOut}
+          delayLongPress={200}
+        >
+          {renderBlocks()}
+          {renderLines()}
+          {renderEvents()}
+          {renderRedLine()}
+          {renderNewEvent()}
+        </Pressable>
       </ScrollView>
     </View>
   );

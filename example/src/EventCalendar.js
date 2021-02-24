@@ -18,9 +18,6 @@ import DayView from './DayView';
 import { heightPerMinute, nowTop } from './utils';
 
 const DAY_IN_MILISECONDS = 86400000
-
-const DAILY_MODE = 'daily';
-const AGENDA_MODE = 'agenda';
 export default class EventCalendar extends React.Component {
 
   static addZero(number) {
@@ -155,7 +152,7 @@ export default class EventCalendar extends React.Component {
     const {
       formatHeader, width,
       format24h, headerStyle, renderEvent, onEventTapped, scrollToFirst, start, end,
-      refreshControl, startKey, endKey, minutesPerBlock
+      refreshControl, startKey, endKey, minutesPerBlock, renderPressEvent, onLongPressOut
     } = this.props;
 
 
@@ -181,6 +178,8 @@ export default class EventCalendar extends React.Component {
         ref={this.state.refArray[index]}
         contentOffset={this.state.currentY}
         minutesPerBlock={minutesPerBlock}
+        renderPressEvent={renderPressEvent}
+        onLongPressOut={onLongPressOut}
       />
     );
   }
