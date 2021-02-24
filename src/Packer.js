@@ -1,11 +1,8 @@
 import moment from 'moment';
+import { BLOCK_HEIGHT } from './constants';
+import { heightPerMinute } from './utils';
 
-const blockHeight = 100;
-const minutesPerBlock = 30;
-
-const heightPerMinute = blockHeight / minutesPerBlock;
-
-function buildEvent(column, left, width, dayStart, startKey, endKey) {
+function buildEvent(column, left, width, dayStart, startKey, endKey, minutesPerBlock) {
   const startTime = moment(column[startKey]);
   const endTime = column[endKey]
     ? moment(column[endKey])
@@ -17,8 +14,8 @@ function buildEvent(column, left, width, dayStart, startKey, endKey) {
   const diffMinutes = startTime.diff(dayStartTime, 'minutes', true);
   const positiveDiff = diffMinutes > 0;
 
-  column.top = (positiveDiff ? diffMinutes : 0) * ( blockHeight / minutesPerBlock );
-  column.height = (endTime.diff(startTime, 'minutes', true) + (positiveDiff ? 0 : diffMinutes)) * heightPerMinute
+  column.top = (positiveDiff ? diffMinutes : 0) * ( BLOCK_HEIGHT / minutesPerBlock );
+  column.height = (endTime.diff(startTime, 'minutes', true) + (positiveDiff ? 0 : diffMinutes)) * heightPerMinute(minutesPerBlock);
   column.width = width;
   column.left = left;
 
@@ -46,7 +43,7 @@ function expand(ev, column, columns, startKey, endKey) {
   return colSpan;
 }
 
-function pack(columns, width, calculatedEvents, dayStart, startKey, endKey) {
+function pack(columns, width, calculatedEvents, dayStart, startKey, endKey, minutesPerBlock) {
   var colLength = columns.length;
 
   for (var i = 0; i < colLength; i++) {
@@ -56,12 +53,12 @@ function pack(columns, width, calculatedEvents, dayStart, startKey, endKey) {
       var L = (i / colLength) * width;
       var W = (width * colSpan) / colLength - 10;
 
-      calculatedEvents.push(buildEvent(col[j], L, W, dayStart, startKey, endKey));
+      calculatedEvents.push(buildEvent(col[j], L, W, dayStart, startKey, endKey, minutesPerBlock));
     }
   }
 }
 
-function populateEvents(events, screenWidth, dayStart, startKey, endKey, orderEvents) {
+function populateEvents(events, screenWidth, dayStart, startKey, endKey, orderEvents, minutesPerBlock) {
   let lastEnd;
   let columns;
   let self = this;
@@ -84,7 +81,7 @@ function populateEvents(events, screenWidth, dayStart, startKey, endKey, orderEv
 
   events.forEach(function(ev, index) {
     if (lastEnd !== null && ev[startKey] >= lastEnd) {
-      pack(columns, screenWidth, calculatedEvents, dayStart, startKey, endKey);
+      pack(columns, screenWidth, calculatedEvents, dayStart, startKey, endKey, minutesPerBlock);
       columns = [];
       lastEnd = null;
     }
@@ -109,7 +106,7 @@ function populateEvents(events, screenWidth, dayStart, startKey, endKey, orderEv
   });
 
   if (columns.length > 0) {
-    pack(columns, screenWidth, calculatedEvents, dayStart, startKey, endKey);
+    pack(columns, screenWidth, calculatedEvents, dayStart, startKey, endKey, minutesPerBlock);
   }
   return calculatedEvents;
 }
