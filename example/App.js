@@ -210,6 +210,8 @@ const App = () =>  {
             initDate={date}
             ref={calendarRef}
             minutesPerBlock={minutesPerBlock}
+            renderPressEvent={renderPressEvent}
+            onLongPressOut={onLongPressOut}
           />
         );
 
@@ -230,10 +232,8 @@ const App = () =>  {
             renderSectionHeader={renderSectionHeader}
             renderDayFooter={renderDayFooter}
             keyExtractor={agendaKeyExtractor}
-            renderPressEvent={renderPressEvent}
-            onLongPressOut={onLongPressOut}
           />
-        )
+        );
       default:
         return null;
     }

@@ -110,9 +110,9 @@ const DayView = React.forwardRef(({
     const newStart = moment(date);
     const blockIndex = newEventTop / BLOCK_HEIGHT;
     newStart.hour(start);
-    newStart.add(blockIndex * MINUTES_PER_BLOCK, 'minutes');
+    newStart.add(blockIndex * minutesPerBlock, 'minutes');
     const newEnd = newStart.clone();
-    newEnd.add(MINUTES_PER_BLOCK, 'minutes');
+    newEnd.add(minutesPerBlock, 'minutes');
 
     onLongPressOut({
       start: newStart.format('YYYY-MM-DDTHH:mm:SS'),
