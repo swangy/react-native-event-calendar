@@ -19,9 +19,6 @@ import {HEIGHT_PER_MINUTE} from './constants';
 import { nowTop } from './utils';
 
 const DAY_IN_MILISECONDS = 86400000
-
-const DAILY_MODE = 'daily';
-const AGENDA_MODE = 'agenda';
 export default class EventCalendar extends React.Component {
 
   static addZero(number) {
@@ -157,7 +154,7 @@ export default class EventCalendar extends React.Component {
     const {
       formatHeader, width,
       format24h, headerStyle, renderEvent, onEventTapped, scrollToFirst, start, end,
-      refreshControl, startKey, endKey
+      refreshControl, startKey, endKey, renderPressEvent, onLongPressOut
     } = this.props;
 
     return (
@@ -181,6 +178,8 @@ export default class EventCalendar extends React.Component {
         onScrollEndDrag={this.onScrollEndHandler}
         ref={this.state.refArray[index]}
         contentOffset={this.state.currentY}
+        renderPressEvent={renderPressEvent}
+        onLongPressOut={onLongPressOut}
       />
     );
   }

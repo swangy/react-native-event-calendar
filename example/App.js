@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import { Button, Dimensions, SafeAreaView, Text, TextInput, useWindowDimensions, View, StyleSheet } from 'react-native';
+import { Button, Dimensions, SafeAreaView, Text, TextInput, useWindowDimensions, View, StyleSheet, Alert } from 'react-native';
 import moment from 'moment';
 import { EventCalendar, AgendaView } from './src';
 import { DAY_IN_MILISECONDS } from './src/constants';
@@ -9,6 +9,7 @@ import { dateToString, newDate } from './src/utils';
 import DaySectionHeader from './src/DaySectionHeader';
 import AgendaEvent from './src/AgendaEvent';
 import EventComponent from './src/EventComponent';
+import EmptyEvent from './src/EmptyEvent';
 
 function addZero(number) {
   return number >= 10 ? number : `0${number}`;
@@ -92,7 +93,7 @@ const App = () =>  {
   const [events, setEvents] = useState(generateEvents('2021-01-09', 5));
   const [date, setDate] = useState('2021-01-11');
   const [goToDate, setGoToDate] = useState('')
-  const [mode, setMode] = useState('agenda');
+  const [mode, setMode] = useState('day');
   const [fetching, setFetching] = useState(false);
 
   const calendarRef = useRef(null);
@@ -159,6 +160,21 @@ const App = () =>  {
 
   const agendaKeyExtractor = (item, index) => index;
 
+  const onLongPressOut = ({ start, end }) => {
+    Alert.alert(
+      "New event",
+      `Start: ${start} - End: ${end}`,
+      [
+        { text: "OK" }
+      ],
+      { cancelable: false }
+    );
+  }
+
+  const renderPressEvent = () => <EmptyEvent />;
+  
+  
+
   return (
     <SafeAreaView style={{flex: 1}}>
       <Text style={{textAlign: 'center'}}>{date}</Text>
@@ -181,6 +197,9 @@ const App = () =>  {
             orderEvents={false}
             initDate={date}
             ref={calendarRef}
+            renderPressEvent={renderPressEvent}
+            onLongPressOut={onLongPressOut}
+
           />
           ) : (
             <AgendaViewSection
