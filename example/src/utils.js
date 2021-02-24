@@ -1,4 +1,4 @@
-import { BLOCK_HEIGHT, MINUTES_PER_BLOCK, DAY_IN_MILISECONDS } from "./constants";
+import { BLOCK_HEIGHT, DAY_IN_MILISECONDS } from "./constants";
 
 export const newDate = (dateString) => new Date(`${dateString}T00:00:00`);
 
@@ -10,11 +10,13 @@ export const dateToString = (date) => (
   `${date.getFullYear()}-${addZero(date.getMonth() + 1)}-${addZero(date.getDate())}`
 )
 
-export const nowTop = (start) => {
+export const heightPerMinute = (minutesPerBlock) => BLOCK_HEIGHT / minutesPerBlock;
+
+export const nowTop = (start, minutesPerBlock) => {
   const now = new Date()
   const nowInMinutes = now.getHours() * 60 + now.getMinutes();
   const startInMinutes = start * 60;
-  return ((nowInMinutes - startInMinutes) / MINUTES_PER_BLOCK) * BLOCK_HEIGHT;
+  return ((nowInMinutes - startInMinutes) / minutesPerBlock) * BLOCK_HEIGHT;
 };
 
 export const indexByDate = (events, date) => {
