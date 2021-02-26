@@ -70,6 +70,11 @@ class AgendaViewSection extends Component {
       getSectionFooterHeight: () => 1,
       listHeaderHeight: 0,
     })
+
+    this.viewabilityConfig = {
+      waitForInteraction: true,
+      viewAreaCoveragePercentThreshold: 0,
+  }
   }
 
   componentDidUpdate(prevProps, prevState) {
@@ -124,6 +129,7 @@ class AgendaViewSection extends Component {
   onViewableItemsChanged({ viewableItems }) {
     if (!viewableItems.length) return;
     const viewableDate = viewableItems[0].section.date;
+
     if (viewableDate === this.state.currentDate) return;
 
     this.setState({ currentDate: viewableDate });
@@ -180,6 +186,7 @@ class AgendaViewSection extends Component {
           onEndReachedThreshold={0.1}
           ListFooterComponent={this.footerLoader}
           renderSectionFooter={renderDayFooter}
+          viewabilityConfig={this.viewabilityConfig}
         />
       </View>
     );
