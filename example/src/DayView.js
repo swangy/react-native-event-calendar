@@ -106,9 +106,11 @@ class DayView extends React.Component {
       start: newStart.format('YYYY-MM-DDTHH:mm:SS'),
       end: newEnd.format('YYYY-MM-DDTHH:mm:SS'),
     });
-
-    this.setState({ newEventTop: null });
   };
+
+  hideEmptyEvent() {
+    this.setState({ newEventTop: null });
+  }
 
   renderNewEvent() {
     const { newEventTop } = this.state;

@@ -189,11 +189,11 @@ const App = () =>  {
       "New event",
       `Start: ${start} - End: ${end}`,
       [
-        { text: "OK" }
+        { text: "OK", onPress: () => calendarRef.current.hideEmptyEvent()}
       ],
       { cancelable: false }
     );
-  }
+  };
 
   const renderPressEvent = () => <EmptyEvent />;
 

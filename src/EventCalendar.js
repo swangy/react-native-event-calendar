@@ -76,6 +76,7 @@ export default class EventCalendar extends React.Component {
     this.onScrollHandler = this.onScrollHandler.bind(this);
     this.onScrollEndHandler = this.onScrollEndHandler.bind(this);
     this.syncVerticalPosition = this.syncVerticalPosition.bind(this);
+    this.hideEmptyEvent = this.hideEmptyEvent.bind(this);
   }
 
   static getDerivedStateFromProps(props, state) {
@@ -146,6 +147,11 @@ export default class EventCalendar extends React.Component {
 
   onScrollEndHandler(event) {
     this.setState({currentY: event.nativeEvent.contentOffset.y})
+  }
+
+  hideEmptyEvent() {
+    const { refArray, currentIndex } = this.state;
+    refArray[currentIndex].current.hideEmptyEvent()
   }
 
   renderItem({ index, item }) {
