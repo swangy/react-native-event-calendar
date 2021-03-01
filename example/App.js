@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import { Button, Dimensions, SafeAreaView, Text, TextInput, useWindowDimensions, View, StyleSheet, Alert } from 'react-native';
+import { Button, Dimensions, SafeAreaView, Text, TextInput, useWindowDimensions, View, StyleSheet, ActivityIndicator, Alert } from 'react-native';
 import moment from 'moment';
 import { EventCalendar, AgendaView } from './src';
 import { DAY_IN_MILISECONDS } from './src/constants';
@@ -90,11 +90,16 @@ const generateBlockedEvent = () => ([{
 
 const App = () =>  {
   
-  const [events, setEvents] = useState(generateEvents('2021-01-09', 5));
-  const [date, setDate] = useState('2021-01-11');
-  const [goToDate, setGoToDate] = useState('')
+  const today = moment().format('YYYY-MM-DD');
+  const twoDaysAgo = moment().subtract(2, 'day').format('YYYY-MM-DD');
+  const [events, setEvents] = useState(generateEvents(twoDaysAgo, 5));
+  const [date, setDate] = useState(today);
+  const [goToDate, setGoToDate] = useState('');
   const [mode, setMode] = useState('day');
   const [fetching, setFetching] = useState(false);
+  const [minutesPerBlock, setMinutesPerBlock] = useState(15);
+  const [minutes, setMinutes] = useState('15');
+  const [loading, setLoading] = useState(false);
 
   const calendarRef = useRef(null);
   const agendaRef = useRef(null);
@@ -160,6 +165,14 @@ const App = () =>  {
 
   const agendaKeyExtractor = (item, index) => index;
 
+  const onMinutesPerBlockChange = () => {
+    setLoading(true);
+    setTimeout(() => {
+      setMinutesPerBlock(Number.parseInt(minutes, 10));
+      setLoading(false);
+    }, 100);
+  }
+
   const onLongPressOut = ({ start, end }) => {
     Alert.alert(
       "New event",
@@ -172,20 +185,19 @@ const App = () =>  {
   }
 
   const renderPressEvent = () => <EmptyEvent />;
-  
-  
 
-  return (
-    <SafeAreaView style={{flex: 1}}>
-      <Text style={{textAlign: 'center'}}>{date}</Text>
-      <View style={{}}>
-        <TextInput value={goToDate} onChangeText={setGoToDate} style={{borderBottomColor: 'grey', borderBottomWidth: 1, marginBottom: 8, }} />
-        <Button title="Go to Date" onPress={goToDateHandler} />
-        <Button title="Change Calendar Mode" onPress={toggleMode} />
-      </View>
-      { 
-        mode === 'day'
-        ? (
+  const renderCalendars = () => {
+    if (loading) {
+      return (
+        <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+          <ActivityIndicator size="large" color={'cyan'} />
+        </View>
+      );
+    }
+
+    switch (mode) {
+      case 'day':
+        return (
           <EventCalendar
             events={events}
             width={width}
@@ -197,29 +209,47 @@ const App = () =>  {
             orderEvents={false}
             initDate={date}
             ref={calendarRef}
+            minutesPerBlock={minutesPerBlock}
             renderPressEvent={renderPressEvent}
             onLongPressOut={onLongPressOut}
-
           />
-          ) : (
-            <AgendaViewSection
-              events={events}
-              width={width}
-              onEventPress={onEventTapped}
-              ref={agendaRef}
-              onDateChange={onDateChange}
-              initialDate={date}
-              onLimitReached={onLimitReached}
-              renderEvent={renderItem}
-              itemHeight={78}
-              loading={fetching}
-              sectionHeaderHeight={40}
-              renderSectionHeader={renderSectionHeader}
-              renderDayFooter={renderDayFooter}
-              keyExtractor={agendaKeyExtractor}
-            />
-          )
-      }
+        );
+
+      case 'agenda':
+        return (
+          <AgendaViewSection
+            events={events}
+            width={width}
+            onEventPress={onEventTapped}
+            ref={agendaRef}
+            onDateChange={onDateChange}
+            initialDate={date}
+            onLimitReached={onLimitReached}
+            renderEvent={renderItem}
+            itemHeight={78}
+            loading={fetching}
+            sectionHeaderHeight={40}
+            renderSectionHeader={renderSectionHeader}
+            renderDayFooter={renderDayFooter}
+            keyExtractor={agendaKeyExtractor}
+          />
+        );
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <SafeAreaView style={{flex: 1}}>
+      <Text style={{textAlign: 'center'}}>{date}</Text>
+      <View style={{}}>
+        <TextInput value={goToDate} onChangeText={setGoToDate} style={{borderBottomColor: 'grey', borderBottomWidth: 1, marginBottom: 8, }} />
+        <Button title="Go to Date" onPress={goToDateHandler} />
+        <TextInput value={minutes} onChangeText={setMinutes} style={{borderBottomColor: 'grey', borderBottomWidth: 1, marginBottom: 8, }} />
+        <Button title="Change Minutes per block" onPress={onMinutesPerBlockChange} />
+        <Button title="Change Calendar Mode" onPress={toggleMode} />
+      </View>
+      { renderCalendars() }
     </SafeAreaView>
   );
 }

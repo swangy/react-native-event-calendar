@@ -15,8 +15,7 @@ import React from 'react';
 import styleConstructor from './style';
 
 import DayView from './DayView';
-import {HEIGHT_PER_MINUTE} from './constants';
-import { nowTop } from './utils';
+import { heightPerMinute, nowTop } from './utils';
 
 const DAY_IN_MILISECONDS = 86400000
 export default class EventCalendar extends React.Component {
@@ -47,10 +46,10 @@ export default class EventCalendar extends React.Component {
     return refArray
   }
 
-  static currentHourOffset = (start, end) => {
+  static currentHourOffset = (start, end, minutesPerBlock) => {
     const nowHour = new Date().getHours()
     if ((nowHour < (start + 1)) || (nowHour > (end + 1))) return 0;
-    return nowTop(start) - 100;
+    return nowTop(start, minutesPerBlock) - 100;
   };
 
   constructor(props) {
@@ -64,13 +63,12 @@ export default class EventCalendar extends React.Component {
       currentDate: props.initDate,
       currentIndex: initialIndex,
       initialIndex: initialIndex,
-      currentY: EventCalendar.currentHourOffset(start, end),
+      currentY: EventCalendar.currentHourOffset(start, end, props.minutesPerBlock),
       events: props.events,
-      refArray: EventCalendar.generateRefArray(props.events.length)
+      refArray: EventCalendar.generateRefArray(props.events.length),
     }
 
-
-    this.calendarStyle = styleConstructor(props.styles, (end - start) * 60 * HEIGHT_PER_MINUTE);
+    this.calendarStyle = styleConstructor(props.styles, (end - start) * 60 * heightPerMinute(props.minutesPerBlock));
 
     this.calendarRef = React.createRef();
     this.getItemLayout = this.getItemLayout.bind(this);
@@ -154,8 +152,9 @@ export default class EventCalendar extends React.Component {
     const {
       formatHeader, width,
       format24h, headerStyle, renderEvent, onEventTapped, scrollToFirst, start, end,
-      refreshControl, startKey, endKey, renderPressEvent, onLongPressOut
+      refreshControl, startKey, endKey, minutesPerBlock, renderPressEvent, onLongPressOut
     } = this.props;
+
 
     return (
       <DayView
@@ -178,6 +177,7 @@ export default class EventCalendar extends React.Component {
         onScrollEndDrag={this.onScrollEndHandler}
         ref={this.state.refArray[index]}
         contentOffset={this.state.currentY}
+        minutesPerBlock={minutesPerBlock}
         renderPressEvent={renderPressEvent}
         onLongPressOut={onLongPressOut}
       />
@@ -229,4 +229,5 @@ EventCalendar.defaultProps = {
   start: 0,
   upperCaseHeader: false,
   onDateChange: null,
+  minutesPerBlock: 30,
 };
