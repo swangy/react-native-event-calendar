@@ -77,6 +77,17 @@ const generateEventsByDate = (momentDate) => {
     })
 
     id+=1
+
+    dayEvents.push({
+      start: generateDate(date, hour, 30),
+      end: generateDate(date, hour + 1, 0),
+      booking_type: 'booking',
+      title: 'Rodrigo Monsalve',
+      subtitle: 'Corte de pelo',
+      id: `${date}-${id}`,
+    })
+
+    id+=1
      
   }
 
