@@ -7,60 +7,45 @@ import { BLOCK_HEIGHT } from './constants';
 import { nowTop, heightPerMinute } from './utils';
 
 const LEFT_MARGIN = 60 - 1;
-function range(from, to) {
-  return Array.from(Array(to), (_, i) => from + i);
-}
 
+class DayView extends React.Component {
 
-const DayView = React.forwardRef(({
-  date,
-  end,
-  events,
-  format24h,
-  renderEvent,
-  renderPressEvent,
-  onLongPressOut,
-  start,
-  styles,
-  width,
-  refreshControl,
-  startKey,
-  endKey,
-  orderEvents,
-  onMomentumScrollEnd,
-  onScrollEndDrag,
-  contentOffset,
-  minutesPerBlock
-}, ref) => {
-  const containerWidth = width - LEFT_MARGIN;
-  const blockedEvents = events.filter((e) => e.booking_type === 'blocked');
-  const normalEvents = events.filter((e) => e.booking_type !== 'blocked');
-  const packedEvents = populateEvents(normalEvents, containerWidth, start, startKey, endKey, orderEvents, minutesPerBlock);
+  static rotatedLenght(lenght) { return Math.sqrt(2 * (lenght ** 2)) };
 
-  const [newEventTop, setNewEventTop] = useState(null);
+  constructor(props) {
+    super(props);
 
-  useEffect(() => {
+    this.state = {
+      newEventTop: null,
+    }
+
+    this.renderRedLine = this.renderRedLine.bind(this);
+    this.onCalendarLongPress = this.onCalendarLongPress.bind(this);
+    this.renderLines = this.renderLines.bind(this);
+    this.renderEvents = this.renderEvents.bind(this);
+    this.onCalendarLongPress = this.onCalendarLongPress.bind(this);
+    this.onCalendarPressOut = this.onCalendarPressOut.bind(this);
+    this.renderNewEvent = this.renderNewEvent.bind(this);
+    this.renderBlocks = this.renderBlocks.bind(this);
+    this.scrollTo = this.scrollTo.bind(this);
+
+    this.scrollRef = React.createRef();
+  }
+
+  componentDidMount() {
     if (Platform.OS === 'ios') return;
     setTimeout(() => {
-      if (!ref.current) return;
-      ref.current.scrollTo({ y: contentOffset, animated: false });
+      if (!this.scrollRef.current) return;
+      this.scrollRef.current.scrollTo({ y: this.props.contentOffset, animated: false });
     }, 0);
-  }, []);
-
-  const renderRedLine = () => {
-    const now = moment();
-    if (!now.isSame(date, 'day')) return null;
-    const top = nowTop(start, minutesPerBlock);
-    const lineWidth = width - 20;
-    return (
-      <>
-        <View style={[styles.lineNow, { top, width: lineWidth }]} />
-        <View style={[styles.circleNow, { top: top - 3 }]} />
-      </>
-    );
   };
 
-  const renderLines = () => {
+  scrollTo(args) {
+    this.scrollRef.current.scrollTo(args);
+  }
+
+  renderLines() {
+    const { start, end, minutesPerBlock, format24h, styles, width } = this.props;
     const time = moment().hour(start).minute(0);
     const lines = Math.floor(((end - start) * 60) / minutesPerBlock);
     return [...Array(lines).keys()].map((i) => {
@@ -77,11 +62,11 @@ const DayView = React.forwardRef(({
     });
   };
 
-
-  const renderEvents = () => {
+  renderEvents(packedEvents) {
+    const { renderEvent } = this.props;
     const componentEvents = packedEvents.map((event, i) => {
       if (event.booking_type === "blocked" || event.booking_type === "empty") return null;
-      
+
       const style = {
         left: event.left,
         height: event.height,
@@ -98,15 +83,18 @@ const DayView = React.forwardRef(({
     );
   };
 
-  const rotatedLenght = (lenght) => (Math.sqrt(2 * (lenght ** 2)));
-
-  const onCalendarLongPress = ({ nativeEvent }) => {
+  onCalendarLongPress({ nativeEvent }) {
     Vibration.vibrate(70);
-    setNewEventTop(Math.floor(nativeEvent.locationY / BLOCK_HEIGHT) * BLOCK_HEIGHT);
+    this.setState({
+      newEventTop: Math.floor(nativeEvent.locationY / BLOCK_HEIGHT) * BLOCK_HEIGHT,
+    });
   };
 
-  const onCalendarPressOut = () => {
+  onCalendarPressOut() {
+    const { newEventTop } = this.state;
     if (newEventTop === null) return;
+
+    const { date, start, minutesPerBlock, onLongPressOut } = this.props;
     const newStart = moment(date);
     const blockIndex = newEventTop / BLOCK_HEIGHT;
     newStart.hour(start);
@@ -118,11 +106,16 @@ const DayView = React.forwardRef(({
       start: newStart.format('YYYY-MM-DDTHH:mm:SS'),
       end: newEnd.format('YYYY-MM-DDTHH:mm:SS'),
     });
-    setNewEventTop(null);
   };
 
-  const renderNewEvent = () => {
+  hideEmptyEvent() {
+    this.setState({ newEventTop: null });
+  }
+
+  renderNewEvent() {
+    const { newEventTop } = this.state;
     if (newEventTop === null) return null;
+    const { renderPressEvent } = this.props;
 
     return (
       <Pressable
@@ -138,9 +131,10 @@ const DayView = React.forwardRef(({
         {renderPressEvent()}
       </Pressable>
     );
-  };
+  }
 
-  const renderBlocks = () => {
+  renderBlocks(blockedEvents) {
+    const { startKey, endKey, start, end, minutesPerBlock, width, styles } = this.props;
     const lineWidth = 4;
     const lineMargin = 8;
     return blockedEvents.filter((event) => { 
@@ -157,9 +151,9 @@ const DayView = React.forwardRef(({
       const height = blockEnd.diff(blockStart, 'minutes', true) * heightPerMinute(minutesPerBlock);
 
 
-      const rotatedLineWidth = rotatedLenght(lineWidth);
-      const rotatedLineMargin = rotatedLenght(lineMargin);
-      const rotatedHeight = rotatedLenght(height);
+      const rotatedLineWidth = DayView.rotatedLenght(lineWidth);
+      const rotatedLineMargin = DayView.rotatedLenght(lineMargin);
+      const rotatedHeight = DayView.rotatedLenght(height);
 
       const blockWidth = width - LEFT_MARGIN + height;
 
@@ -202,33 +196,66 @@ const DayView = React.forwardRef(({
     });
   };
 
-  return (
-    <View style={{ flex: 1, width }}>
-      <ScrollView
-        contentContainerStyle={[styles.contentStyle, { width }]}
-        showsVerticalScrollIndicator
-        contentOffset={{ y: contentOffset }}
-        refreshControl={refreshControl}
-        onMomentumScrollEnd={onMomentumScrollEnd}
-        onScrollEndDrag={onScrollEndDrag}
-        ref={ref}
-      >
-        <Pressable
-          style={{ flex: 1 }}
-          onLongPress={onCalendarLongPress}
-          onPressOut={onCalendarPressOut}
-          delayLongPress={200}
+  renderRedLine() {
+    const { start, minutesPerBlock, width, date, styles } = this.props;
+    const now = moment();
+    if (!now.isSame(date, 'day')) return null;
+    const top = nowTop(start, minutesPerBlock);
+    const lineWidth = width - 20;
+    return (
+      <>
+        <View style={[styles.lineNow, { top, width: lineWidth }]} />
+        <View style={[styles.circleNow, { top: top - 3 }]} />
+      </>
+    );
+  };
+
+  render () {
+    const {
+      width, contentOffset, refreshControl, onMomentumScrollEnd, onScrollEndDrag, events,
+      start, end, startKey, endKey, orderEvents, minutesPerBlock, styles
+    } = this.props;
+
+    const eventsContainerWidth = width - LEFT_MARGIN;
+    const blockedEvents = events.filter((e) => e.booking_type === 'blocked');
+    const packedEvents = populateEvents(
+      events.filter((e) => e.booking_type !== 'blocked'),
+      eventsContainerWidth,
+      start,
+      startKey,
+      endKey,
+      orderEvents,
+      minutesPerBlock
+    );
+
+    return (
+      <View style={{ flex: 1, width }}>
+        <ScrollView
+          contentContainerStyle={[styles.contentStyle, { width }]}
+          showsVerticalScrollIndicator
+          contentOffset={{ y: contentOffset }}
+          refreshControl={refreshControl}
+          onMomentumScrollEnd={onMomentumScrollEnd}
+          onScrollEndDrag={onScrollEndDrag}
+          ref={this.scrollRef}
         >
-          {renderBlocks()}
-          {renderLines()}
-          {renderEvents()}
-          {renderRedLine()}
-          {renderNewEvent()}
-        </Pressable>
-      </ScrollView>
-    </View>
-  );
-});
+          <Pressable
+            style={{ flex: 1 }}
+            onLongPress={this.onCalendarLongPress}
+            onPressOut={this.onCalendarPressOut}
+            delayLongPress={200}
+          >
+            {this.renderBlocks(blockedEvents)}
+            {this.renderLines()}
+            {this.renderEvents(packedEvents)}
+            {this.renderRedLine()}
+            {this.renderNewEvent()}
+          </Pressable>
+        </ScrollView>
+      </View>
+    );
+  }
+}
 
 const arePropsEqual = (prevProps, nextProps) => {
   return prevProps.events === nextProps.events
