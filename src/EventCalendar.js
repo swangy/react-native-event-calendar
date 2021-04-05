@@ -31,9 +31,9 @@ export default class EventCalendar extends React.Component {
   static newDate(dateString) { return  new Date(`${dateString}T00:00:00`) }
 
   static indexByDate(events, date) {
-    const firstDate = EventCalendar.newDate(events[0].date)
-    const indexDate = EventCalendar.newDate(date)
-    return (indexDate.getTime() - firstDate.getTime()) / DAY_IN_MILISECONDS
+    const firstDate = moment.utc(events[0].date)
+    const indexDate = moment.utc(date)
+    return indexDate.diff(firstDate, 'days')
   }
 
   static dateByIndex(events, index) { return events[index].date }
